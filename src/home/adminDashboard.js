@@ -7,9 +7,15 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { IoMdMenu } from 'react-icons/io'
+import Logout from '../auth/logout';
+import { Divider } from '@material-ui/core';
+import { UserContext } from '../App';
+import Users from '../modules/users';
 const useStyles = makeStyles({
   list: {
     width: 250,
+    marginTop:'5vh',
+    paddingLeft:'3%'
   },
   fullList: {
     width: 'auto',
@@ -35,9 +41,10 @@ const drawerSegments = [
 
 export default function AdminDashboard(props) {
   const classes = useStyles();
-  const [state, setState] = React.useState({
+  const [state1, setState] = React.useState({
     left: false
   });
+  const { state, dispatch } = React.useContext(UserContext);
   const [ bodyCase, switchBodyCase ] = React.useState(bodyDivs.USERS);
 
   const toggleDrawer = (anchor, open) => (event) => {
@@ -45,7 +52,7 @@ export default function AdminDashboard(props) {
       return;
     }
 
-    setState({ ...state, [anchor]: open });
+    setState({ ...state1, [anchor]: open });
   };
 
   const BodyDiv = _ =>{
@@ -56,7 +63,7 @@ export default function AdminDashboard(props) {
               );
           case bodyDivs.USERS:
               return (
-                  <p>Users</p>
+                 <Users />
               );
           case bodyDivs.GROUPS:
               return (
@@ -82,7 +89,7 @@ export default function AdminDashboard(props) {
     >
       <List>
         {drawerSegments.map((text, index) => (
-          <ListItem button key={text.name} onClick={()=>{switchBodyCase(text.id)}}>
+          <ListItem button key={index} onClick={()=>{switchBodyCase(text.id)}}>
             <ListItemText primary={text.name} />
           </ListItem>
         ))}
@@ -92,13 +99,15 @@ export default function AdminDashboard(props) {
 
   return (
     <div className="admin_home" style={{'padding':'20px'}}>
-        <Button style={{'display':'inline-flex','float':'right'}}>Logout</Button>
+        <Logout style={{'display':'inline-flex','float':'right'}} />
         <Button style={{'display':'inline-flex','float':'left'}} variant="text">
         <IoMdMenu size={30} onClick={toggleDrawer('left', true)} />
         </Button>
         <h3> OJT Web | Admin Dashboard </h3>
+        <Divider />
+        <p> Welcome {state.name} #{state.tokenId} </p>
         <React.Fragment>
-          <Drawer anchor={'left'} open={state['left']} onClose={toggleDrawer('left', false)}>
+          <Drawer anchor={'left'} open={state1['left']} onClose={toggleDrawer('left', false)}>
             {list('left')}
           </Drawer>
         </React.Fragment>
