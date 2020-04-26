@@ -8,35 +8,41 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { IoMdMenu } from 'react-icons/io'
 import Logout from '../auth/logout';
-import { Divider } from '@material-ui/core';
+import { Divider, Avatar } from '@material-ui/core';
 import { UserContext } from '../App';
 import Users from '../modules/users';
-const useStyles = makeStyles({
+import { deepOrange } from '@material-ui/core/colors';
+
+const useStyles = makeStyles((theme) => ({
   list: {
     width: 250,
-    marginTop:'5vh',
-    paddingLeft:'3%'
+    marginTop: '5vh',
+    paddingLeft: '3%'
   },
   fullList: {
     width: 'auto',
   },
-  admin_home:{
+  admin_home: {
     margin: '1vh'
+  },
+  orange: {
+    color: theme.palette.getContrastText(deepOrange[500]),
+    backgroundColor: deepOrange[500],
   }
-});
+}));
 
 const bodyDivs = {
-    USERS: 'users',
-    CREATE_OJT: 'create_ojt',
-    GROUPS: 'groups',
-    PENDING_OJTS: 'pending_ojts'
+  USERS: 'users',
+  CREATE_OJT: 'create_ojt',
+  GROUPS: 'groups',
+  PENDING_OJTS: 'pending_ojts'
 };
 
 const drawerSegments = [
-    { name:'Users',id:bodyDivs.USERS },
-    { name:'Create OJT',id:bodyDivs.CREATE_OJT },
-    { name:'Groups',id:bodyDivs.GROUPS },
-    { name:'Pending OJTs',id:bodyDivs.PENDING_OJTS }
+  { name: 'Users', id: bodyDivs.USERS },
+  { name: 'Create OJT', id: bodyDivs.CREATE_OJT },
+  { name: 'Groups', id: bodyDivs.GROUPS },
+  { name: 'Pending OJTs', id: bodyDivs.PENDING_OJTS }
 ]
 
 export default function AdminDashboard(props) {
@@ -45,7 +51,7 @@ export default function AdminDashboard(props) {
     left: false
   });
   const { state, dispatch } = React.useContext(UserContext);
-  const [ bodyCase, switchBodyCase ] = React.useState(bodyDivs.USERS);
+  const [bodyCase, switchBodyCase] = React.useState(bodyDivs.USERS);
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -55,27 +61,27 @@ export default function AdminDashboard(props) {
     setState({ ...state1, [anchor]: open });
   };
 
-  const BodyDiv = _ =>{
-      switch (bodyCase) {
-          case bodyDivs.CREATE_OJT:
-              return (
-                  <p>Create OJT</p>
-              );
-          case bodyDivs.USERS:
-              return (
-                 <Users />
-              );
-          case bodyDivs.GROUPS:
-              return (
-                  <p>Groups</p>
-              );
-          case bodyDivs.PENDING_OJTS:
-              return (
-                  <p>Pending OJTs</p>
-              );
-        default:
-            return ('');
-      }
+  const BodyDiv = _ => {
+    switch (bodyCase) {
+      case bodyDivs.CREATE_OJT:
+        return (
+          <p>Create OJT</p>
+        );
+      case bodyDivs.USERS:
+        return (
+          <Users />
+        );
+      case bodyDivs.GROUPS:
+        return (
+          <p>Groups</p>
+        );
+      case bodyDivs.PENDING_OJTS:
+        return (
+          <p>Pending OJTs</p>
+        );
+      default:
+        return ('');
+    }
   }
 
   const list = (anchor) => (
@@ -89,7 +95,7 @@ export default function AdminDashboard(props) {
     >
       <List>
         {drawerSegments.map((text, index) => (
-          <ListItem button key={index} onClick={()=>{switchBodyCase(text.id)}}>
+          <ListItem button key={index} onClick={() => { switchBodyCase(text.id) }}>
             <ListItemText primary={text.name} />
           </ListItem>
         ))}
@@ -98,24 +104,25 @@ export default function AdminDashboard(props) {
   );
 
   return (
-    <div className="admin_home" style={{'padding':'20px'}}>
-        <Logout style={{'display':'inline-flex','float':'right'}} />
-        <Button style={{'display':'inline-flex','float':'left'}} variant="text">
-        <IoMdMenu size={30} onClick={toggleDrawer('left', true)} />
-        </Button>
-        <h3> OJT Web | Admin Dashboard </h3>
-        <Divider />
-        <p> Welcome {state.name} #{state.tokenId} </p>
-        <React.Fragment>
-          <Drawer anchor={'left'} open={state1['left']} onClose={toggleDrawer('left', false)}>
-            {list('left')}
-          </Drawer>
-        </React.Fragment>
+    <div className="admin_home" style={{ 'padding': '20px' }}>
+      <Logout style={{ 'display': 'inline-flex', 'float': 'right' }} />
+      <Button onClick={toggleDrawer('left', true)}
+        style={{ 'display': 'inline-flex', 'float': 'left' }} variant="text">
+        <IoMdMenu size={30} />
+      </Button>
+      <h3> OJT Web | Admin Dashboard </h3>
+      <Divider />
+      <p> Welcome {state.name.toLocaleUpperCase()} #{state.tokenId} </p>
+      <React.Fragment>
+        <Drawer anchor={'left'} open={state1['left']} onClose={toggleDrawer('left', false)}>
+          {list('left')}
+        </Drawer>
+      </React.Fragment>
 
-        {/* selective divs */}
-        <div style={{marginTop:'7vh'}}>
+      {/* selective divs */}
+      <div style={{ marginTop: '7vh' }}>
         <BodyDiv />
-        </div>
+      </div>
     </div>
   );
 }

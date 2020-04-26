@@ -7,9 +7,9 @@ import { Button } from '@material-ui/core';
 const Logout = _ => {
     const { state, dispatch } = React.useContext(UserContext);
     const handleLogout = _ => {
-        firebase.auth().signOut().then( _ => {
+        firebase.auth().signOut().then(_ => {
             dispatch({
-                role: null, dept: null ,name: null, type: 'ALL',
+                role: null, dept: null, name: null, type: 'ALL',
                 tokenId: null, isLoggedIn: false, loading: false
             });
             window.localStorage.removeItem('userData');
@@ -20,7 +20,7 @@ const Logout = _ => {
     };
 
     return (
-        <div id="fc-logout" style={{float:'right'}}>
+        <div id="fc-logout" style={{ float: 'right' }}>
             <Button onClick={handleLogout} variant="text" disableElevation color="secondary"> Logout </Button>
         </div>
     );
