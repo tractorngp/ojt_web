@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, TableCell, TableBody, TableRow, TableHead, Paper, TableContainer, Table, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, CardActions, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
+import { Button, TableCell, TableBody, TableRow, TableHead, Paper, TableContainer, Table, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import * as XLSX from 'xlsx';
@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { IoMdPersonAdd, IoMdCheckmarkCircleOutline, IoMdRefreshCircle } from 'react-icons/io';
 import { useForm } from 'react-hook-form';
 import { saltValue } from './../utils/environment.prod';
+import { FRESH_TOKEN } from '../utils/constants';
 
 const PAGINATION_SIZE = 3;
 
@@ -127,7 +128,7 @@ const Users = props => {
           hpw: hpw,
           name: user.name !== null ? user.name : '',
           active: true,
-          deviceToken: 'freshToken'
+          deviceToken: FRESH_TOKEN
         });
       }
     });

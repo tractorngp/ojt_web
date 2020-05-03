@@ -8,10 +8,11 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { IoMdMenu } from 'react-icons/io'
 import Logout from '../auth/logout';
-import { Divider, Avatar } from '@material-ui/core';
+import { Divider } from '@material-ui/core';
 import { UserContext } from '../App';
 import Users from '../modules/users';
 import { deepOrange } from '@material-ui/core/colors';
+import Groups from '../modules/groups';
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -50,7 +51,7 @@ export default function AdminDashboard(props) {
   const [state1, setState] = React.useState({
     left: false
   });
-  const { state, dispatch } = React.useContext(UserContext);
+  const { state } = React.useContext(UserContext);
   const [bodyCase, switchBodyCase] = React.useState(bodyDivs.USERS);
 
   const toggleDrawer = (anchor, open) => (event) => {
@@ -73,7 +74,7 @@ export default function AdminDashboard(props) {
         );
       case bodyDivs.GROUPS:
         return (
-          <p>Groups</p>
+         <Groups />
         );
       case bodyDivs.PENDING_OJTS:
         return (

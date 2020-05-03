@@ -12,12 +12,10 @@ const initialState = {
   dept: null,
   name: null,
   isLoggedIn: false,
-  loading: false
+  loading: false,
+  groups: []
 };
 
-const FC_TEAM = 'fixed_cost_team';
-const REQUESTER = 'requester';
-const ADMIN = 'admin';
 export const UserContext = React.createContext();
 
 const userReducer = (state,action) => {
@@ -28,12 +26,18 @@ const userReducer = (state,action) => {
         name:action.name,
         dept: action.dept,
         isLoggedIn: action.isLoggedIn,
-        tokenId: action.tokenId
+        tokenId: action.tokenId,
+        groups: []
       }
       case 'loading':
         return{
           ...state,
           loading: action.loading
+        }
+      case 'groups':
+        return {
+          ...state,
+          groups: action.groups
         }
       default:
         return state;
@@ -49,7 +53,7 @@ function App() {
       type:'loading',
       loading:true
     });
-    const userData = JSON.parse(window.localStorage.getItem('userData'));
+    const userData = JSON.parse(window.localStorage.getItem('ojtUserData'));
     if(userData !== null && userData !== undefined){
       firebase.auth().signInAnonymously().then(_=>{
         dispatch(userData)

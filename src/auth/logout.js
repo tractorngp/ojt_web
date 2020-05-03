@@ -5,14 +5,14 @@ import { UserContext } from '../App';
 import { Button } from '@material-ui/core';
 
 const Logout = _ => {
-    const { state, dispatch } = React.useContext(UserContext);
+    const { dispatch } = React.useContext(UserContext);
     const handleLogout = _ => {
         firebase.auth().signOut().then(_ => {
             dispatch({
                 role: null, dept: null, name: null, type: 'ALL',
                 tokenId: null, isLoggedIn: false, loading: false
             });
-            window.localStorage.removeItem('userData');
+            window.localStorage.removeItem('ojtUserData');
         }).catch(e => {
             console.error(e);
             alert('Logout Error, try again');
