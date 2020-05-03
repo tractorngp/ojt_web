@@ -1,18 +1,12 @@
 import React from 'react';
-import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import Button from '@material-ui/core/Button';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { IoMdMenu } from 'react-icons/io'
 import Logout from '../auth/logout';
-import { Divider } from '@material-ui/core';
 import { UserContext } from '../App';
 import Users from '../modules/users';
 import { deepOrange } from '@material-ui/core/colors';
-import Groups from '../modules/groups';
+import {Groups} from '../modules/groups';
+import { Navbar, Nav, Form } from 'react-bootstrap';
+import * as logo from './../assets/images/tractor_pg.png';
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -48,19 +42,8 @@ const drawerSegments = [
 
 export default function AdminDashboard(props) {
   const classes = useStyles();
-  const [state1, setState] = React.useState({
-    left: false
-  });
   const { state } = React.useContext(UserContext);
   const [bodyCase, switchBodyCase] = React.useState(bodyDivs.USERS);
-
-  const toggleDrawer = (anchor, open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
-
-    setState({ ...state1, [anchor]: open });
-  };
 
   const BodyDiv = _ => {
     switch (bodyCase) {
@@ -85,40 +68,30 @@ export default function AdminDashboard(props) {
     }
   }
 
-  const list = (anchor) => (
-    <div
-      className={clsx(classes.list, {
-        [classes.fullList]: anchor === 'top' || anchor === 'bottom',
-      })}
-      role="presentation"
-      onClick={toggleDrawer(anchor, false)}
-      onKeyDown={toggleDrawer(anchor, false)}
-    >
-      <List>
-        {drawerSegments.map((text, index) => (
-          <ListItem button key={index} onClick={() => { switchBodyCase(text.id) }}>
-            <ListItemText primary={text.name} />
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
-
   return (
-    <div className="admin_home" style={{ 'padding': '20px' }}>
-      <Logout style={{ 'display': 'inline-flex', 'float': 'right' }} />
-      <Button onClick={toggleDrawer('left', true)}
-        style={{ 'display': 'inline-flex', 'float': 'left' }} variant="text">
-        <IoMdMenu size={30} />
-      </Button>
-      <h3> OJT Web | Admin Dashboard </h3>
-      <Divider />
-      <p> Welcome {state.name.toLocaleUpperCase()} #{state.tokenId} </p>
-      <React.Fragment>
-        <Drawer anchor={'left'} open={state1['left']} onClose={toggleDrawer('left', false)}>
-          {list('left')}
-        </Drawer>
-      </React.Fragment>
+    <div className="admin_home" style={{ 'padding': '10px' }}>
+      <Navbar bg="light" expand="lg">
+  <Navbar.Brand>
+  <img
+        src={logo}
+        width="30"
+        height="30"
+        className="d-inline-block align-top"
+        alt="Tractor PG Logo"
+      />
+    &nbsp; OJT Web | Admin Dashboard </Navbar.Brand>
+  <Navbar.Toggle aria-controls="basic-navbar-nav" />
+  <Navbar.Collapse id="basic-navbar-nav">
+    <Nav className="mr-auto">
+      {drawerSegments.map((text,index)=> (
+        <Nav.Link style={bodyCase === text.id ? {color:'blue',background:'#eee',borderRadius:'5px'} :{color:'black'}  } key={index} onClick={() => { switchBodyCase(text.id) }}> {text.name} </Nav.Link>
+      ))}
+    </Nav>
+    <Form inline>
+    <Logout style={{ 'display': 'inline-flex' }} />
+    </Form>
+  </Navbar.Collapse>
+</Navbar>
 
       {/* selective divs */}
       <div style={{ marginTop: '7vh' }}>

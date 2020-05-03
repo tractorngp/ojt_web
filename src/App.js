@@ -1,4 +1,5 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
@@ -12,8 +13,7 @@ const initialState = {
   dept: null,
   name: null,
   isLoggedIn: false,
-  loading: false,
-  groups: []
+  loading: true
 };
 
 export const UserContext = React.createContext();
@@ -26,18 +26,12 @@ const userReducer = (state,action) => {
         name:action.name,
         dept: action.dept,
         isLoggedIn: action.isLoggedIn,
-        tokenId: action.tokenId,
-        groups: []
+        tokenId: action.tokenId
       }
       case 'loading':
         return{
           ...state,
           loading: action.loading
-        }
-      case 'groups':
-        return {
-          ...state,
-          groups: action.groups
         }
       default:
         return state;
