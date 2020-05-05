@@ -79,7 +79,7 @@ export default function AdminDashboard(props) {
         className="d-inline-block align-top"
         alt="Tractor PG Logo"
       />
-    &nbsp; OJT Web | Admin Dashboard </Navbar.Brand>
+    &nbsp; OJT Web | Admin </Navbar.Brand>
   <Navbar.Toggle aria-controls="basic-navbar-nav" />
   <Navbar.Collapse id="basic-navbar-nav">
     <Nav className="mr-auto">

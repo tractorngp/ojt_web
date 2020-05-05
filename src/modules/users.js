@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, TableCell, TableBody, TableRow, TableHead, Paper, TableContainer, Table, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
+import { Button, Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import * as XLSX from 'xlsx';
@@ -8,6 +8,7 @@ import { IoMdPersonAdd, IoMdCheckmarkCircleOutline, IoMdRefreshCircle } from 're
 import { useForm } from 'react-hook-form';
 import { saltValue } from './../utils/environment.prod';
 import { FRESH_TOKEN } from '../utils/constants';
+import { ListGroup, Row, Col, FormGroup, Form } from 'react-bootstrap';
 
 const PAGINATION_SIZE = 3;
 
@@ -183,6 +184,17 @@ const Users = props => {
       })
   };
 
+  const handleRefreshToken = row => {
+    const tokenId = row.tokenid;
+    db.collection('users').doc(String(tokenId))
+      .update({
+        deviceToken: FRESH_TOKEN
+      }).catch(error => {
+        console.log(error);
+        alert('Refresh Devices Failed');
+      })
+  };
+
   const handleNextPage = _ => {
     setCurrentPage(currentPage + 1);
     getAllUsers();
@@ -333,26 +345,44 @@ const Users = props => {
         userRows.length !== 0 ?
           <div id="users-div">
             <TableContainer component={Paper}>
-              <Table className={classes.table} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell className={classes.tableCell} align="left">Employee #</TableCell>
-                    <TableCell className={classes.tableCell} align="left">Name</TableCell>
-                    <TableCell className={classes.tableCell} align="left">Email &nbsp; (@)</TableCell>
-                    <TableCell className={classes.tableCell} align="left">Role</TableCell>
-                    <TableCell className={classes.tableCell} align="left"> Status </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {userRows.map((row) => (
-                    <TableRow key={row.tokenid}>
-                      <TableCell >
+              <ListGroup style={{textAlign:'left'}}>
+                <ListGroup.Item active>
+                  <Row>
+                    <Col xs={2} md={2} lg={2} xl={2} >
+                      Employee ID
+                          </Col>
+                    <Col xs={2} md={2} lg={2} xl={2} >
+                      Name
+                    {/* <Form.Control type="text" placeholder="Name..." type={'search'} /> */}
+                          </Col>
+                    <Col xs={3} md={3} lg={3} xl={3} >
+                      Email
+                          </Col>
+                    <Col xs={2} md={2} lg={2} xl={2} >
+                      Role
+                          </Col>
+                    <Col xs={3} md={3} lg={3} xl={3} >
+                      Status
+                          </Col>
+                  </Row>
+                </ListGroup.Item>
+                {userRows.map((row) => (
+                  <ListGroup.Item key={row.tokenid}>
+                    <Row>
+                      <Col xs={2} md={2} lg={2} xl={2} >
                         {row.tokenid}
-                      </TableCell>
-                      <TableCell >{row.name}</TableCell>
-                      <TableCell align="left">{row.email}</TableCell>
-                      <TableCell component="th" scope="row" align="left">{row.role.toLocaleUpperCase()}</TableCell>
-                      <TableCell style={{ width: '20%' }} scope="row" align="right"> {row.status ? 'Active' : 'Inactive'}
+                      </Col>
+                      <Col xs={2} md={2} lg={2} xl={2} >
+                        {row.name}
+                      </Col>
+                      <Col xs={3} md={3} lg={3} xl={3} >
+                        {row.email}
+                      </Col>
+                      <Col xs={2} md={2} lg={2} xl={2} >
+                        {row.role.toLocaleUpperCase()}
+                      </Col>
+                      <Col xs={3} md={3} lg={3} xl={3} >
+                        {row.status ? 'Active' : 'Inactive'}
                         <Tooltip title="Toggle Status" aria-label="Toggle Status">
                           <Switch
                             checked={row.status}
@@ -363,13 +393,16 @@ const Users = props => {
                           />
                         </Tooltip>
                         <Tooltip title="Refresh Devices" aria-label="Refresh Devices">
-                          <Button size='small'> <IoMdRefreshCircle size={20} /> </Button>
+                          <Button size='small' onClick={
+                            () => handleRefreshToken(row)
+                          }  > <IoMdRefreshCircle size={20} /> </Button>
                         </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </Col>
+                    </Row>
+
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
             </TableContainer>
             {/* <Button disabled={currentPage===0} onClick={()=>{setCurrentPage(currentPage-1);getAllUsers();} } > Prev Page </Button>
     <Button disabled={ currentPage >= maxSize } onClick={handleNextPage} > Next Page </Button> */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, TextField, Button, makeStyles } from '@material-ui/core';
+import { Container, makeStyles } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import UsersSearchFilter from '../components/usersSearchFilter';
@@ -51,7 +51,7 @@ const CreateGroup = ({ name, selectedTokenIds }) => {
                                     (val) => {
                                         const name = val.target.value;
                                         groupDispatch({
-                                            type: 'NAME', group_id: name
+                                            type: 'NAME', group_name: name
                                         });
                                     }
                                 } placeholder="group name" defaultValue={name}

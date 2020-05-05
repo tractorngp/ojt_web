@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, makeStyles, Container, TextField } from '@material-ui/core';
+import { Checkbox, makeStyles, Container } from '@material-ui/core';
 import { GroupContext } from '../modules/groups';
 import { FormControl, InputGroup } from 'react-bootstrap';
 
@@ -12,18 +12,24 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const UsersSearchFilter = ({ users, roles, initialSelectedIds }) => {
+const UsersSearchFilter = ({ users, roles, selectedIds }) => {
 
     const classes = useStyles();
 
     const [usersList, setUsersList] = React.useState([]);
     const [searchAdminText, setSearchAdminText] = React.useState(null);
     const [searchUserText, setSearchUserText] = React.useState(null);
-    const { groupState, groupDispatch } = React.useContext(GroupContext);
-
+    const { groupState, groupDispatch, selectedTokenState, selectedTokenDispatch }
+     = React.useContext(GroupContext);
     const consolidateUsers = _ => {
+        console.log(groupState, selectedTokenState);
         setUsersList(users.map(x => {
-            let selected = !(new Array(initialSelectedIds).lastIndexOf(x.tokenId) === -1);
+            let selected = false;
+            if(selectedIds !== null && selectedIds !== undefined){
+                selectedIds.forEach(selId => {
+                    if(selId === x.tokenId) selected = true;
+                })
+            }
             return {
                 role: x.role,
                 user: x,
@@ -35,38 +41,34 @@ const UsersSearchFilter = ({ users, roles, initialSelectedIds }) => {
     const editSelectedList = (val, tokenId) => {
         if (val.target.checked === true) {
             // add to list
-            let currList = groupState.group_members;
+            let currList = selectedTokenState.selectedTokenIds;
             if (currList !== null && currList !== undefined) {
                 if (currList.lastIndexOf(tokenId) === -1) {
                     currList.push(tokenId);
-                    groupDispatch({
-                        type: 'MEMBERS', group_members: currList
+                    selectedTokenDispatch({
+                        type: 'ALL', selectedTokenIds: currList
                     });
                 }
             } else {
                 let currList = [];
                 currList.push(tokenId);
-                groupDispatch({
-                    type: 'MEMBERS', group_members: currList
-                })
+                selectedTokenDispatch({
+                    type: 'ALL', selectedTokenIds: currList
+                });
             }
         } else {
             // remove from list
-            if (groupState.group_members !== null && groupState.group_members !== undefined) {
-                let currList = groupState.group_members.filter(x => x !== tokenId);
-                groupDispatch({
-                    type: 'MEMBERS', group_members: currList
-                })
+            if (selectedTokenState.selectedTokenIds !== null && selectedTokenState.selectedTokenIds !== undefined) {
+                let currList = selectedTokenState.selectedTokenIds.filter(x => x !== tokenId);
+                selectedTokenDispatch({
+                    type: 'ALL', selectedTokenIds: currList
+                });
             }
         }
     };
 
     React.useEffect(_ => {
-        if (initialSelectedIds !== []) {
-            groupDispatch({
-                type: 'MEMBERS', group_members: initialSelectedIds
-            });
-        }
+        console.log(selectedIds);
         consolidateUsers();
     }, []);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserContext } from '../App';
-import { Button, Container, Grid, makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
+import { Button, Container, makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
 import ViewGroups from './viewGroups';
 import CreateGroup from './createGroup';
 import { Modal } from "react-bootstrap";
@@ -9,7 +9,13 @@ import 'firebase/firestore';
 
 const initialState = {
     group_id: null,
-    group_members: []
+    name:null,
+    group_members: [],
+    active: false
+};
+
+const selectedTokenInitialState = {
+    selectedTokenIds: []
 };
 
 const useStyles = makeStyles(theme => ({
@@ -26,17 +32,38 @@ const useStyles = makeStyles(theme => ({
 
 export const GroupContext = React.createContext();
 
+const selectedTokensReducer = (state,action) => {
+    switch(action.type) {
+        case 'ALL':
+            return {
+                ...state,
+                selectedTokenIds: action.selectedTokenIds
+            };
+        case 'CLEAR':
+            return selectedTokenInitialState;
+        default:
+            return state;
+    }
+};
+
 const groupsReducer = (state, action) => {
     switch (action.type) {
         case 'ALL':
             return {
                 group_id: action.group_id,
-                group_members: action.group_members
+                name: action.name,
+                group_members: action.group_members,
+                active: action.active
             };
-        case 'NAME':
+        case 'GROUP_ID':
             return {
                 ...state,
                 group_id: action.group_id
+            }
+        case 'NAME':
+            return {
+                ...state,
+                name: action.group_name
             };
         case 'MEMBERS':
             return {
@@ -52,7 +79,8 @@ const groupsReducer = (state, action) => {
 
 export const Groups = props => {
     const classes = useStyles();
-    const [groupState, groupDispatch] = React.useReducer(groupsReducer, initialState);
+    const [ groupState, groupDispatch ] = React.useReducer(groupsReducer, initialState);
+    const [ selectedTokenState, selectedTokenDispatch ] = React.useReducer(selectedTokensReducer, selectedTokenInitialState);
     const [open, setOpen] = React.useState(false);
     const { state } = React.useContext(UserContext);
     const [openSnackbar, setSnackbar] = React.useState(false);
@@ -64,19 +92,24 @@ export const Groups = props => {
         setOpen(false);
     }
 
-    const createGroup = _ => {
+    const createGroup = async _ => {
         setMaskingText('Creating Group...');
         setBackdrpFlag(true);
         let gMembers = [];
-        groupState.group_members.forEach(gm => {
+        selectedTokenState.selectedTokenIds.forEach(gm => {
             gMembers.push(db.collection('users').doc(String(gm)));
         })
         const groupData = {
-            group_id: groupState.group_id,
+            group_id: null,
+            name: groupState.name,
             group_members: gMembers,
-            active: true
+            active: true,
+            createdDate: new Date().toISOString()
         };
-        db.collection('groups').doc(String(groupData.group_id))
+        // TODO - check if group_id is already taken
+        const newGroupRef = (await db.collection('groups').add()).id;
+        groupData.group_id = newGroupRef;
+        db.collection('groups').doc(newGroupRef)
             .set(groupData).then(_ => {
                 setBackdrpFlag(false); setMaskingText('');
                 setOpen(false); groupDispatch({ type: 'CLEAR' });
@@ -89,7 +122,7 @@ export const Groups = props => {
     };
 
     return (
-        <GroupContext.Provider value={{ groupState, groupDispatch }} >
+        <GroupContext.Provider value={{ groupState, groupDispatch, selectedTokenState, selectedTokenDispatch }} >
             <div>
                 <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
                     <div className={classes.snackbarStyle} > Group Created Successfully! </div>
@@ -110,7 +143,7 @@ export const Groups = props => {
                             Cancel
                         </Button> &nbsp;
                         <Button color={'primary'}
-                            disabled={!(new String(groupState.group_id).length > 0
+                            disabled={!(new String(groupState.name) !== null && new String(groupState.name).length > 0
                                 && Array.isArray(groupState.group_members) && groupState.group_members.length > 0)}
                             onClick={createGroup}
                         >Submit</Button>
