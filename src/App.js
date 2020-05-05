@@ -1,4 +1,5 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
@@ -12,12 +13,9 @@ const initialState = {
   dept: null,
   name: null,
   isLoggedIn: false,
-  loading: false
+  loading: true
 };
 
-const FC_TEAM = 'fixed_cost_team';
-const REQUESTER = 'requester';
-const ADMIN = 'admin';
 export const UserContext = React.createContext();
 
 const userReducer = (state,action) => {
@@ -49,7 +47,7 @@ function App() {
       type:'loading',
       loading:true
     });
-    const userData = JSON.parse(window.localStorage.getItem('userData'));
+    const userData = JSON.parse(window.localStorage.getItem('ojtUserData'));
     if(userData !== null && userData !== undefined){
       firebase.auth().signInAnonymously().then(_=>{
         dispatch(userData)

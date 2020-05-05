@@ -61,7 +61,7 @@ const Login = props => {
 
     const classes = useStyles();
     const formRef = React.useRef(null);
-    const { state, dispatch } = React.useContext(UserContext);
+    const { dispatch } = React.useContext(UserContext);
     const [loading, setLoading] = React.useState(false);
     const db = firebase.firestore();
 
@@ -69,9 +69,7 @@ const Login = props => {
         setLoading(true);
         const tokenId = formRef.current['tokenId'].value;
         const password = formRef.current['password'].value;
-        console.log(password);
         if (validateField(tokenId) && validateField(password)) {
-            console.log(firebase.auth().currentUser);
             db.collection('users').doc(String(tokenId))
                 .get().then(val => {
                     const pwCheck = bcrypt.compareSync(password, val.data().hpw);
@@ -92,7 +90,7 @@ const Login = props => {
                                 setLoading(false);
                                 alert('Access Denied, only for Admins');
                             } else {
-                                window.localStorage.setItem('userData', JSON.stringify(userData));
+                                window.localStorage.setItem('ojtUserData', JSON.stringify(userData));
                                 dispatch(userData);
 
                             }
