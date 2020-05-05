@@ -6,6 +6,7 @@ import CreateGroup from './createGroup';
 import { Modal } from "react-bootstrap";
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
 
 const initialState = {
     group_id: null,
@@ -143,8 +144,8 @@ export const Groups = props => {
                             Cancel
                         </Button> &nbsp;
                         <Button color={'primary'}
-                            disabled={!(new String(groupState.name) !== null && new String(groupState.name).length > 0
-                                && Array.isArray(groupState.group_members) && groupState.group_members.length > 0)}
+                            disabled={!(nullChecker(groupState.name) && new String(groupState.name).length > 0
+                                && listEmptyChecker(selectedTokenState.selectedTokenIds))}
                             onClick={createGroup}
                         >Submit</Button>
                     </Modal.Footer>
