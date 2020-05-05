@@ -108,7 +108,7 @@ export const Groups = props => {
             createdDate: new Date().toISOString()
         };
         // TODO - check if group_id is already taken
-        const newGroupRef = (await db.collection('groups').add()).id;
+        const newGroupRef = (await db.collection('groups').doc()).id;
         groupData.group_id = newGroupRef;
         db.collection('groups').doc(newGroupRef)
             .set(groupData).then(_ => {
