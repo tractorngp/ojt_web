@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, makeStyles } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import UsersSearchFilter from '../components/usersSearchFilter';
+import UsersSearchFilter from './../../components/usersSearchFilter';
 import { GroupContext } from './groups';
 import { InputGroup, FormControl } from 'react-bootstrap';
 

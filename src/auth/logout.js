@@ -1,6 +1,4 @@
 import React from 'react';
-import * as firebase from 'firebase';
-import 'firebase/auth';
 import { UserContext } from '../App';
 import { Button } from '@material-ui/core';
 import { IoMdPower } from 'react-icons/io';
