@@ -1,9 +1,11 @@
 import React from 'react';
-import { Container, FormControl, Row, Col, Card, Button, ListGroup } from 'react-bootstrap';
+import { Container, FormControl, Row, Col, Card, Button, ListGroup, Modal } from 'react-bootstrap';
 import QuestionDisplay from '../../utils/questionDisplayComponent';
 import { makeStyles } from '@material-ui/core/styles';
 import { IoMdAddCircle, IoMdCloudUpload, IoMdTrash, IoMdCreate, IoMdRemoveCircleOutline } from 'react-icons/io';
 import MediaUploader from '../../utils/mediaUploader';
+import QuestionComponent from '../../components/questionComponent';
+import { listEmptyChecker, nullChecker } from '../../utils/commonUtils';
 
 const useStyles = makeStyles(theme => ({
     createContainer: {
@@ -14,11 +16,18 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+const questionIntial = {
+    question: null,
+    answers: []
+}
+
 const CreateOjt = props => {
     
     const classes = useStyles();
     const [filesList, setFilesList] = React.useState([]);
     const uploadRef = React.useRef(null);
+    const [ open, setOpen ] = React.useState(false);
+    const [ createQuestion, createQuestionDispatch ] = React.useState(questionIntial);
 
     const uploadFile = async files => {
         const f = files[0];
@@ -41,8 +50,30 @@ const CreateOjt = props => {
         setFilesList(tempList);
     };
 
+    const handleClose = _ => {
+        setOpen(false);
+    };
+
     return (
         <Container fluid>
+            <Modal show={open} onHide={handleClose} animation={true}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Add Question</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <QuestionComponent question={createQuestion} questionDispatch={createQuestionDispatch} />
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button onClick={handleClose}>
+                            Cancel
+                        </Button> &nbsp;
+                        <Button
+                        onClick={()=> {
+                            console.log(createQuestion);
+                        }}
+                        color={'primary'}>Submit</Button>
+                    </Modal.Footer>
+                </Modal>
             <h5> Create OJT </h5>
             
         <Row>
@@ -60,7 +91,9 @@ const CreateOjt = props => {
             {/* controls section */}
             <Row>
                 <Col md={6}>
-                    <Button variant={'primary'}> <IoMdAddCircle /> Add Question</Button>
+                    <Button variant={'primary'}
+                    onClick={ ()=> setOpen(true) }
+                    > <IoMdAddCircle /> Add Question</Button>
                 </Col>
                 <Col md={6}>
                     <Button variant={'info'}

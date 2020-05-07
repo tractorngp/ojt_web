@@ -188,7 +188,7 @@ const Users = props => {
     const tokenId = row.tokenid;
     db.collection('users').doc(String(tokenId))
       .update({
-        deviceToken: FRESH_TOKEN
+        deviceToken: null
       }).catch(error => {
         console.log(error);
         alert('Refresh Devices Failed');
@@ -216,7 +216,7 @@ const Users = props => {
           active: true,
           email: values.email,
           tokenId: values.tokenId,
-          deviceToken: 'freshToken'
+          deviceToken: null
         };
         db.collection('users').doc(String(values.tokenId))
           .set(userData).then(_ => {

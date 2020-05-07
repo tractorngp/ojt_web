@@ -10,6 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import tractorPg from './../assets/images/tractor_pg.png';
 import mahindraRise from './../assets/images/mahindra_rise.png';
 import { IoMdArrowForward } from 'react-icons/io';
+import { setStorageItem } from '../utils/sessionStorageService';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -90,7 +91,7 @@ const Login = props => {
                                 setLoading(false);
                                 alert('Access Denied, only for Admins');
                             } else {
-                                window.localStorage.setItem('ojtUserData', JSON.stringify(userData));
+                                setStorageItem('ojtUserData',userData);
                                 dispatch(userData);
 
                             }
