@@ -5,6 +5,7 @@ import { UserContext } from '../App';
 import Users from '../modules/users';
 import { deepOrange } from '@material-ui/core/colors';
 import {Groups} from '../modules/groups';
+import {PendingOJTs} from '../modules/pendingOJTs';
 import { Navbar, Nav, Form } from 'react-bootstrap';
 import * as logo from './../assets/images/tractor_pg.png';
 
@@ -61,7 +62,7 @@ export default function AdminDashboard(props) {
         );
       case bodyDivs.PENDING_OJTS:
         return (
-          <p>Pending OJTs</p>
+          <PendingOJTs />
         );
       default:
         return ('');
