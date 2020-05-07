@@ -26,8 +26,8 @@ const useStyles = makeStyles(theme => ({
 
 export const GroupContext = React.createContext();
 
-function createData(active, assigned_to, group_id, images, no_of_attempts, ojt_name, questions, record_id, status, assigned_date, due_date, q_type) {
-    return { active, assigned_to, group_id, images, no_of_attempts, ojt_name, questions, record_id, status, assigned_date, due_date, q_type };
+function createData(active, assigned_to, group_id, images, no_of_attempts, ojt_name, questions, record_id, status, assigned_date, due_date, q_type, group_name, assigned_to_name) {
+    return { active, assigned_to, group_id, images, no_of_attempts, ojt_name, questions, record_id, status, assigned_date, due_date, q_type, group_name, assigned_to_name };
   }
 
 
@@ -56,27 +56,36 @@ export const PendingOJTs = props => {
       };
 
     const getAllPendingOJTs = async _ => {
-        // console.log('hey');
-        // const allList = await db.collection('users').get();
-        // const size = allList.docs;
-        // console.log(size);
-        // setMaxSize(size);
-        const userRef = db.collection('users').doc('1111');
+        var ref = state.tokenId
+        const userRef = db.collection('users').doc(ref);
         db.collection('assigned_ojts')
             .where('active', "==", true)
-            .where('assigned_to', "==", userRef)
             .where('status', "==", 'assigned')
-            .orderBy('record_id','asc')
-            //  .startAt(currentPage * PAGINATION_SIZE)
-            //  .limit(PAGINATION_SIZE)
+            .orderBy('group_id', 'asc')
             .onSnapshot(snapshot => {
             const assigned_ojts = snapshot.docs;
             const tempList = [];
-            assigned_ojts.forEach(user => {
-                const docData = user.data();
-                tempList.push(createData(docData.active, docData.assigned_to, docData.group_id, docData.images, docData.no_of_attempts, docData.ojt_name, docData.questions, docData.record_id, docData.status, docData.assigned_date, docData.due_date, docData.q_type));
-            });
-            setOJTs(tempList);
+            var i = 0;
+            if(assigned_ojts != null && assigned_ojts.length > 0){
+                assigned_ojts.forEach(async (user) => {
+                    const docData = user.data();
+                    const ref1 = docData.assigned_to
+                    const ref2 = docData.group_id
+                    const res1 = await ref1.get();
+                    const res2 = await ref2.get();
+                    docData.assigned_to_name = (res1.data() != null ? res1.data().name : "");
+                    docData.group_name = (res2.data() != null ? res2.data().name : "");
+                    tempList.push(createData(docData.active, docData.assigned_to, docData.group_id, docData.images, docData.no_of_attempts, docData.ojt_name, docData.questions, docData.record_id, docData.status, docData.assigned_date, docData.due_date, docData.q_type, docData.group_name, docData.assigned_to_name));
+                    i++;
+                    if(i == assigned_ojts.length){
+                        setOJTs(tempList);
+                    }
+                });
+            }
+            else{
+                setOJTs(tempList);
+            }
+            
             }, error => {
             console.log(error);
             alert('Error Fetching Users');
@@ -108,11 +117,11 @@ export const PendingOJTs = props => {
                       <Col xs={1} md={1} lg={1} xl={1} >
                         OJT name
                             </Col>
-                      <Col xs={1} md={1} lg={1} xl={1} >
+                      <Col xs={2} md={2} lg={2} xl={2} >
                         Assigned to
                       {/* <Form.Control type="text" placeholder="Name..." type={'search'} /> */}
                             </Col>
-                      <Col xs={1} md={1} lg={1} xl={1} >
+                      <Col xs={2} md={2} lg={2} xl={2} >
                         Group
                             </Col>
                       <Col xs={1} md={1} lg={1} xl={1} >
@@ -135,11 +144,11 @@ export const PendingOJTs = props => {
                         <Col xs={1} md={1} lg={1} xl={1} >
                           {row.ojt_name}
                         </Col>
-                        <Col xs={1} md={1} lg={1} xl={1} >
-                          {"Assigned to"}
+                        <Col xs={2} md={2} lg={2} xl={2} >
+                          {row.assigned_to_name != null ? row.assigned_to_name : ""}
                         </Col>
-                        <Col xs={1} md={1} lg={1} xl={1} >
-                          {"Group"}
+                        <Col xs={2} md={2} lg={2} xl={2} >
+                          {row.group_name != null ? row.group_name : ""}
                         </Col>
                         <Col xs={1} md={1} lg={1} xl={1} >
                           {row.active ? 'Active' : 'Inactive'}
