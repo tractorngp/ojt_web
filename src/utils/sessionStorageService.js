@@ -3,14 +3,16 @@ import crypto from 'crypto-js';
 
 export const setStorageItem = (key, value) => {
     const valueAsString = JSON.stringify(value);
-    const encryptedValue = crypto.AES.encrypt(valueAsString,key);
+    const encryptedValue = crypto.AES.encrypt(valueAsString,key).toString();
+    console.log(encryptedValue);
     window.sessionStorage.setItem(key, encryptedValue);
 };
 
 export const getStorageItem = key => {
     const encryptedValue = window.sessionStorage.getItem(key);
     if(nullChecker(encryptedValue)){
-        const decryptedString = crypto.AES.decrypt(encryptedValue,key).toString();
+        const decryptedString = crypto.AES.decrypt(encryptedValue,key)
+        .toString(crypto.enc.Utf8);
         return JSON.parse(decryptedString);
     }
     return null;

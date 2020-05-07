@@ -36,9 +36,12 @@ const ViewOjt = props => {
                         <ListGroup.Item key={templateItem.ojt_name}>
                             <Row>
                                 <Col md={6} xs={6} xl={6} lg={6}>
-                                <p> {templateItem.ojt_name} &nbsp;
+                                <p> {templateItem.ojt_name} &nbsp; <br />
                                 <Badge variant={'info'}> {'Media: '+templateItem.images.length}
-                                </Badge> </p> 
+                                </Badge>
+                                <Badge variant={'info'}> {'Questions: '+templateItem.questions.length}
+                                </Badge>
+                                 </p> 
                                 </Col>
                                 <Col md={6} xs={6} xl={6} lg={6}>
                                     <Tooltip title="OJT Info">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, FormControl, Row, Col, Button, ListGroup, Card } from 'react-bootstrap';
 import { Checkbox } from '@material-ui/core';
-import { nullChecker } from '../utils/commonUtils';
+import { nullChecker, stringIsNotEmpty } from '../utils/commonUtils';
 
 /*
 question : {
@@ -47,9 +47,9 @@ const AnswerComponent = ({ index, answers, AnswerDispatch, question, questionDis
     };
 
     const handleChoiceChange = val => {
-        if (nullChecker(answer)) {
-            updateAnswers(!correctChoice,answer);
-            setCorrectChoice(!correctChoice);
+        if (stringIsNotEmpty(answer)) {
+            updateAnswers(val,answer);
+            setCorrectChoice(val);
         } else {
             alert('You need to enter Answer first...');
         }
@@ -66,7 +66,7 @@ const AnswerComponent = ({ index, answers, AnswerDispatch, question, questionDis
         <Row>
             <Col md={2}>
                 <Checkbox checked={correctChoice}
-                    onChange={(val) => handleChoiceChange(val.target.value)}
+                    onChange={(val) => handleChoiceChange(val.target.checked)}
                 />
             </Col>
             <Col md={10}>
@@ -78,7 +78,7 @@ const AnswerComponent = ({ index, answers, AnswerDispatch, question, questionDis
     );
 };
 
-const QuestionComponent = ({ question, questionDispatch }) => {
+const QuestionComponent = ({ index, question, questionDispatch }) => {
 
     const [allAnswers, setAnswers] = React.useState([]);
     const [ answerTexts, setAnwerTexts ] = React.useState([]);
@@ -94,6 +94,11 @@ const QuestionComponent = ({ question, questionDispatch }) => {
         question.question = val;
         questionDispatch(question);
     }
+
+    React.useEffect( _ => {
+        question.index = index;
+        questionDispatch(question);
+    }, []);
 
     return (
         <Container fluid>
@@ -117,10 +122,6 @@ const QuestionComponent = ({ question, questionDispatch }) => {
                         ))}
                     </ListGroup> : 'Add Answers'
             }</Card>
-                <button onClick={()=> {
-                    console.log(answerTexts);
-                    console.log(question);
-                }} > Ttest </button>
         </Container>
     );
 

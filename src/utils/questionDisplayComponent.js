@@ -18,12 +18,12 @@ const QuestionDisplay = ({question, answers, correctAnswers}) => {
             {
                 answers.map((answer, index) => (
                     !correctAnswers.includes(answer) ?
-                    <ListGroup.Item style={answerStyle}>
-                        <p> <Badge variant={'info'}>{index}</Badge>&nbsp; {answer}</p>
+                    <ListGroup.Item key={index} style={answerStyle}>
+                        <p> <Badge variant={'info'}>{index+1}</Badge>&nbsp; {answer}</p>
                     </ListGroup.Item>
                     :
-                    <ListGroup.Item style={answerStyle} variant={'success'}>
-                        <p> <Badge variant={'info'}>{index}</Badge>&nbsp; <IoMdCheckmarkCircle /> {answer}</p>
+                    <ListGroup.Item key={index} style={answerStyle} variant={'success'}>
+                        <p> <Badge variant={'info'}>{index+1}</Badge>&nbsp; <IoMdCheckmarkCircle /> {answer}</p>
                     </ListGroup.Item>
                 ))
             }
