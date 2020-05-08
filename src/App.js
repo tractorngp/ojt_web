@@ -6,6 +6,7 @@ import 'firebase/auth';
 import AdminDashboard from './home/adminDashboard';
 import Login from './auth/login';
 import { CircularProgress } from '@material-ui/core';
+import { getStorageItem } from './utils/sessionStorageService';
 
 const initialState = {
   tokenId: null,
@@ -47,7 +48,7 @@ function App() {
       type:'loading',
       loading:true
     });
-    const userData = JSON.parse(window.localStorage.getItem('ojtUserData'));
+    const userData = getStorageItem('ojtUserData');
     if(userData !== null && userData !== undefined){
       firebase.auth().signInAnonymously().then(_=>{
         dispatch(userData)

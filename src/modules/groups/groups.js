@@ -1,12 +1,12 @@
 import React from 'react';
-import { UserContext } from '../App';
+import { UserContext } from '../../App';
 import { Button, Container, makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
 import ViewGroups from './viewGroups';
 import CreateGroup from './createGroup';
 import { Modal } from "react-bootstrap";
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
+import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
 
 const initialState = {
     group_id: null,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Checkbox, makeStyles, Container } from '@material-ui/core';
-import { GroupContext } from '../modules/groups';
+import { GroupContext } from '../modules/groups/groups';
 import { FormControl, InputGroup } from 'react-bootstrap';
 
 const useStyles = makeStyles(theme => ({

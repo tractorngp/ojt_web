@@ -6,7 +6,7 @@ import { IoMdCreate } from 'react-icons/io';
 import { Modal, ListGroup, Row, Col, Badge } from 'react-bootstrap';
 import CreateGroup from './createGroup';
 import { GroupContext } from './groups';
-import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
+import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
 
 const useStyles = makeStyles((theme) => ({
   table: {
@@ -221,6 +221,7 @@ const ViewGroups = props => {
                   <Tooltip title={'Toggle Group Status'} >
                   <Switch
                     defaultChecked={row.active}
+                    checked={row.active}
                     onChange={(val) => {
                       toggleGroupStatus(val, row.group_id)
                     }}

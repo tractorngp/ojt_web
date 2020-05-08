@@ -1,9 +1,8 @@
 import React from 'react';
-import * as firebase from 'firebase';
-import 'firebase/auth';
 import { UserContext } from '../App';
 import { Button } from '@material-ui/core';
 import { IoMdPower } from 'react-icons/io';
+import { removeStorageItem } from '../utils/sessionStorageService';
 
 const Logout = _ => {
     const { dispatch } = React.useContext(UserContext);
@@ -12,7 +11,7 @@ const Logout = _ => {
                 role: null, dept: null, name: null, type: 'ALL',
                 tokenId: null, isLoggedIn: false, loading: false
             });
-            window.localStorage.removeItem('ojtUserData');
+            removeStorageItem('ojtUserData');
     };
 
     return (

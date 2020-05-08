@@ -8,6 +8,7 @@ import {Groups} from '../modules/groups';
 import {PendingOJTs} from '../modules/pendingOJTs';
 import { Navbar, Nav, Form } from 'react-bootstrap';
 import * as logo from './../assets/images/tractor_pg.png';
+import MainOjtPage from '../modules/ojts/Ojt';
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -50,7 +51,7 @@ export default function AdminDashboard(props) {
     switch (bodyCase) {
       case bodyDivs.CREATE_OJT:
         return (
-          <p>Create OJT</p>
+          <MainOjtPage />
         );
       case bodyDivs.USERS:
         return (
