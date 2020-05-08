@@ -13,8 +13,7 @@ import { Backdrop, Snackbar, CircularProgress } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
     createContainer: {
-        maxHeight: '60vh',
-        minHeight: '40vh',
+        maxHeight: '40vh',
         overflowX: 'hidden',
         overflowY: 'auto'
     },
@@ -139,11 +138,10 @@ const CreateOjt = props => {
             active: true,
             no_of_attempts: 0,
             ojt_name: ojtName,
-            assigned_date: now,
-            due_date: dueDate,
+            created_date: now,
+            due_date: dueDate.toISOString(),
             questions: questionnaire,
-            images: images,
-            record_id: 1
+            images: images
         };
         // add to collection
         const ojt_ref = db.collection('ojt_templates').doc();
@@ -195,7 +193,7 @@ const CreateOjt = props => {
     };
 
     return (
-        <Jumbotron>
+        <Jumbotron style={{maxHeight:'80vh',overflowY:'auto',overflowX:'hidden'}}>
             <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
                 <div className={classes.snackbarStyle} > OJT created Successfully! </div>
             </Snackbar>
@@ -213,12 +211,14 @@ const CreateOjt = props => {
                         question={createQuestion} questionDispatch={createQuestionDispatch} />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={handleClose}>
+                    <Button
+                    variant={'light'}
+                    onClick={handleClose}>
                         Cancel
                         </Button> &nbsp;
                         <Button
                         onClick={submitQuestion}
-                        color={'primary'}>Submit</Button>
+                        variant={'success'}>Submit</Button>
                 </Modal.Footer>
             </Modal>
             <h5> Create OJT </h5>
@@ -257,7 +257,7 @@ const CreateOjt = props => {
                         <InputGroup.Text> Due Date </InputGroup.Text>
                         </InputGroup.Prepend>
                         <FormControl
-                            value={dueDate.toISOString().substr(0, 10)}
+                            value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
                             type={'date'}
                             placeholder={'Due Date'}
                             onChange={(val) => { setDueDate(val.target.valueAsDate) }}

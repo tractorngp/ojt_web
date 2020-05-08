@@ -138,8 +138,8 @@ export const PendingOJTs = props => {
                             </Col>
                     </Row>
                   </ListGroup.Item>
-                  {pendingOJTrows.map((row) => (
-                    <ListGroup.Item key={row.record_id}>
+                  {pendingOJTrows.map((row,index) => (
+                    <ListGroup.Item key={index}>
                       <Row>
                         <Col xs={1} md={1} lg={1} xl={1} >
                           {row.ojt_name}
@@ -163,10 +163,10 @@ export const PendingOJTs = props => {
                           </Tooltip>
                         </Col>
                         <Col xs={2} md={2} lg={2} xl={2} >
-                          {row.assigned_date}
+                          {row.assigned_date ? new Date(row.assigned_date).toLocaleDateString() : null}
                         </Col>
                         <Col xs={2} md={2} lg={2} xl={2} >
-                          {row.due_date}
+                          {row.due_date ? new Date(row.due_date).toLocaleDateString() : null}
                         </Col>
                         <Col xs={1} md={1} lg={1} xl={1} >
                           {row.questions != null ? row.questions.length : 0}

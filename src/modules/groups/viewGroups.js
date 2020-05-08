@@ -220,7 +220,6 @@ const ViewGroups = props => {
                   <Button size={'small'} onClick={() => editGroup(row)}  ><IoMdCreate /> Edit Group </Button>
                   <Tooltip title={'Toggle Group Status'} >
                   <Switch
-                    defaultChecked={row.active}
                     checked={row.active}
                     onChange={(val) => {
                       toggleGroupStatus(val, row.group_id)
