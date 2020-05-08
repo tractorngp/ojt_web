@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
+import { Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import * as XLSX from 'xlsx';
@@ -8,7 +8,7 @@ import { IoMdPersonAdd, IoMdCheckmarkCircleOutline, IoMdRefreshCircle } from 're
 import { useForm } from 'react-hook-form';
 import { saltValue } from './../utils/environment.prod';
 import { FRESH_TOKEN } from '../utils/constants';
-import { ListGroup, Row, Col, FormGroup, Form } from 'react-bootstrap';
+import { ListGroup, Row, Col, FormGroup, Form, Button } from 'react-bootstrap';
 
 const PAGINATION_SIZE = 3;
 
@@ -305,13 +305,13 @@ const Users = props => {
           </Typography>
           <Typography className={classes.title} color="textSecondary" gutterBottom>
             <Button type={'submit'} style={{ padding: '15px 50px 15px 50px' }}
-              size="small" variant={'contained'} color="primary">
+              size="small" variant={'success'} color="primary">
               Submit &nbsp;
             <IoMdCheckmarkCircleOutline />
             </Button>
             &nbsp; &nbsp;
             <Button type={'button'} onClick={() => setUserModal(false)} style={{ padding: '15px 50px 15px 50px' }}
-              size="small" variant={'contained'} color="secondary">
+              size="small" variant={'light'} color="secondary">
               Cancel
             </Button>
           </Typography>
@@ -337,8 +337,8 @@ const Users = props => {
       >
         {createUserBody}
       </Modal>
-      <Button onClick={() => setUserModal(true)} color={'secondary'} style={{ float: 'right' }} > <IoMdPersonAdd /> &nbsp; Create User </Button>
-      <Button onClick={triggerFile} variant="contained" color="primary">Upload Users From Excel</Button>
+      <Button onClick={() => setUserModal(true)} variant={'outline-primary'} style={{ float: 'right' }} > <IoMdPersonAdd /> &nbsp; Create User </Button>
+      <Button onClick={triggerFile} variant="contained" variant={'primary'}>Upload Users From Excel</Button>
       <input ref={fileRef} style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
       <br /><br />
       {
@@ -393,7 +393,7 @@ const Users = props => {
                           />
                         </Tooltip>
                         <Tooltip title="Refresh Devices" aria-label="Refresh Devices">
-                          <Button size='small' onClick={
+                          <Button size='small' variant={'light'} onClick={
                             () => handleRefreshToken(row)
                           }  > <IoMdRefreshCircle size={20} /> </Button>
                         </Tooltip>

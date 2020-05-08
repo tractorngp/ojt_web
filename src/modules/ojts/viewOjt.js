@@ -98,6 +98,7 @@ const ViewOjt = props => {
             {
                 ojtTemplates.length > 0 ?
                 <ListGroup>
+                    <ListGroup.Item active> ALl OJTs </ListGroup.Item>
                 {
                     ojtTemplates.map(templateItem => (
                         <ListGroup.Item key={templateItem.ojt_name}>
@@ -105,7 +106,7 @@ const ViewOjt = props => {
                                 <Col md={6} xs={6} xl={6} lg={6}>
                                 <p> {templateItem.ojt_name} &nbsp; <br />
                                 <Badge variant={'info'}> {'Media: '+templateItem.images.length}
-                                </Badge>
+                                </Badge> &nbsp;
                                 <Badge variant={'info'}> {'Questions: '+templateItem.questions.length}
                                 </Badge>
                                  </p> 

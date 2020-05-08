@@ -1,16 +1,16 @@
 import React from 'react';
 import { UserContext } from '../../App';
-import { Button, Container, makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
+import { Container, makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
 import ViewGroups from './viewGroups';
 import CreateGroup from './createGroup';
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
 
 const initialState = {
     group_id: null,
-    name:null,
+    name: null,
     group_members: [],
     active: false
 };
@@ -25,16 +25,16 @@ const useStyles = makeStyles(theme => ({
         color: '#fff',
     },
     snackbarStyle: {
-      padding: '20px',
-      color: 'white',
-      background: '#4caf50'
+        padding: '20px',
+        color: 'white',
+        background: '#4caf50'
     }
 }));
 
 export const GroupContext = React.createContext();
 
-const selectedTokensReducer = (state,action) => {
-    switch(action.type) {
+const selectedTokensReducer = (state, action) => {
+    switch (action.type) {
         case 'ALL':
             return {
                 ...state,
@@ -80,8 +80,8 @@ const groupsReducer = (state, action) => {
 
 export const Groups = props => {
     const classes = useStyles();
-    const [ groupState, groupDispatch ] = React.useReducer(groupsReducer, initialState);
-    const [ selectedTokenState, selectedTokenDispatch ] = React.useReducer(selectedTokensReducer, selectedTokenInitialState);
+    const [groupState, groupDispatch] = React.useReducer(groupsReducer, initialState);
+    const [selectedTokenState, selectedTokenDispatch] = React.useReducer(selectedTokensReducer, selectedTokenInitialState);
     const [open, setOpen] = React.useState(false);
     const { state } = React.useContext(UserContext);
     const [openSnackbar, setSnackbar] = React.useState(false);
@@ -115,7 +115,7 @@ export const Groups = props => {
                 setBackdrpFlag(false); setMaskingText('');
                 setOpen(false); groupDispatch({ type: 'CLEAR' });
                 setSnackbar(true);
-            }).catch( error => {
+            }).catch(error => {
                 setBackdrpFlag(false); setMaskingText('');
                 setOpen(false); alert('Error Uploading Group');
                 console.error(error);
@@ -132,7 +132,7 @@ export const Groups = props => {
                     <CircularProgress style={{ 'color': 'white' }} size={20} />
                     &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
                 </Backdrop>
-                <Modal show={open} onHide={handleClose} animation={false}>
+                <Modal size={'lg'} show={open} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Create Group</Modal.Title>
                     </Modal.Header>
@@ -140,10 +140,10 @@ export const Groups = props => {
                         <CreateGroup />
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button onClick={handleClose}>
+                        <Button variant='light' onClick={handleClose}>
                             Cancel
                         </Button> &nbsp;
-                        <Button color={'primary'}
+                        <Button variant='success'
                             disabled={!(nullChecker(groupState.name) && new String(groupState.name).length > 0
                                 && listEmptyChecker(selectedTokenState.selectedTokenIds))}
                             onClick={createGroup}
@@ -151,7 +151,7 @@ export const Groups = props => {
                     </Modal.Footer>
                 </Modal>
                 <Container>
-                    <Button onClick={() => setOpen(true)} variant="contained" color="primary" > + Create Group </Button>
+                    <Button onClick={() => setOpen(true)} color="primary" > + Create Group </Button>
                     <br /> <br />
                     <ViewGroups state={state} />
                 </Container>

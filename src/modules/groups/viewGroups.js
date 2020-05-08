@@ -1,9 +1,9 @@
 import React from 'react';
-import { TableContainer, Paper, makeStyles, Switch, Button, Chip, Tooltip, Snackbar, Backdrop, CircularProgress } from '@material-ui/core';
+import { TableContainer, Paper, makeStyles, Switch, Chip, Tooltip, Snackbar, Backdrop, CircularProgress } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { IoMdCreate } from 'react-icons/io';
-import { Modal, ListGroup, Row, Col, Badge } from 'react-bootstrap';
+import { Modal, ListGroup, Row, Col, Badge, Button } from 'react-bootstrap';
 import CreateGroup from './createGroup';
 import { GroupContext } from './groups';
 import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
@@ -162,7 +162,7 @@ const ViewGroups = props => {
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
           <div className={classes.snackbarStyle} > Group Updated Successfully! </div>
         </Snackbar>
-        <Modal show={open} onHide={handleClose} animation={false}>
+        <Modal size={'xl'} show={open} onHide={handleClose} animation={false}>
           <Modal.Header closeButton>
             <Modal.Title>Edit Group</Modal.Title>
           </Modal.Header>
@@ -172,10 +172,10 @@ const ViewGroups = props => {
             />
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={handleClose}>
+            <Button variant={'light'} onClick={handleClose}>
               Cancel
                         </Button> &nbsp;
-                        <Button color={'primary'}
+                        <Button variant={'success'}
               disabled={!(nullChecker(groupState.name) && groupState.name.length > 0 
                 && listEmptyChecker(selectedTokenState.selectedTokenIds) )}
               onClick={saveGroup}
@@ -217,7 +217,7 @@ const ViewGroups = props => {
                   }
                   </Col>
                   <Col md={3} sm={3}>
-                  <Button size={'small'} onClick={() => editGroup(row)}  ><IoMdCreate /> Edit Group </Button>
+                  <Button size={'small'} variant={'light'} onClick={() => editGroup(row)}  ><IoMdCreate /> Edit Group </Button>
                   <Tooltip title={'Toggle Group Status'} >
                   <Switch
                     checked={row.active}
