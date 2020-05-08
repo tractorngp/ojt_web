@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, FormControl, Row, Col, Card, Button, ListGroup, Modal, Jumbotron } from 'react-bootstrap';
+import { Container, FormControl, Row, Col, Card, Button, ListGroup, Modal, Jumbotron, InputGroup } from 'react-bootstrap';
 import QuestionDisplay from '../../utils/questionDisplayComponent';
 import { makeStyles } from '@material-ui/core/styles';
 import { IoMdAddCircle, IoMdCloudUpload, IoMdTrash, IoMdCreate, IoMdRemoveCircleOutline } from 'react-icons/io';
@@ -9,6 +9,7 @@ import { nullChecker, listEmptyChecker, stringIsEmpty } from '../../utils/common
 
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import { Backdrop, Snackbar, CircularProgress } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
     createContainer: {
@@ -16,6 +17,14 @@ const useStyles = makeStyles(theme => ({
         minHeight: '40vh',
         overflowX: 'hidden',
         overflowY: 'auto'
+    },
+    snackbarStyle: {
+        padding: '20px',
+        color: 'white',
+        background: '#4caf50'
+    }, backdrop: {
+        zIndex: theme.zIndex.drawer + 100,
+        color: '#fff',
     }
 }));
 
@@ -38,24 +47,31 @@ const questionIntial = {
 const CreateOjt = props => {
 
     const classes = useStyles();
+    const db = firebase.firestore();
     const [filesList, setFilesList] = React.useState([]);
     const uploadRef = React.useRef(null);
     const [open, setOpen] = React.useState(false);
     const [ojtName, setOjtName] = React.useState('');
     const [createQuestion, createQuestionDispatch] = React.useState(questionIntial);
     const [questionnaire, setQuestionnaire] = React.useState([]);
-    const [ dueDate, setDueDate ] = React.useState(new Date());
-    const db = firebase.firestore();
+    const [dueDate, setDueDate] = React.useState(new Date());
+    const [openSnackbar, setSnackbar] = React.useState(false);
+    const [maskingText, setMaskingText] = React.useState('');
+    const [backdropFlag, setBackdrpFlag] = React.useState(false);
 
     const uploadFile = async file => {
         const f = file;
         const name = f.name; const type = f.type;
         if (type === 'image/jpeg' || type === 'image/png') {
-            const reference = `images/${name}`;
-            const durl = await MediaUploader(reference, f);
+            //const reference = `images/${name}`;
+            const reference = `images/${'' + new Date().toISOString()}`;
+            const durl = await MediaUploader(reference, f).then(url => {
+                return url;
+            });
             return durl;
         } else {
-            alert('Not Image');
+            return null;
+            //alert('Not Image');
         }
     };
 
@@ -74,6 +90,7 @@ const CreateOjt = props => {
     const clearAll = _ => {
         setFilesList([]);
         setOjtName('');
+        setDueDate(new Date());
         setQuestionnaire([]);
     }
 
@@ -88,7 +105,7 @@ const CreateOjt = props => {
         if (!nullChecker(createQuestion.question) || createQuestion.question.length < 3
             || !listEmptyChecker(createQuestion.answers) || createQuestion.answers.length < 2
             || hasAtleastOneCorrectAnswer(createQuestion.answers)) {
-                console.log(createQuestion);
+            console.log(createQuestion);
             alert('Please fill Question details')
         } else {
             const question = {};
@@ -115,25 +132,9 @@ const CreateOjt = props => {
 
     }
 
-    // WIP
-    const validateAndCreateOjt = async _ => {
-        // validate files, ojt name
-
-        // upload files and get download urls
-
-        // create data model for ojt_template
+    const uploadOJT = images => {
         const now = new Date().toISOString();
-        let images = [];
-        filesList.forEach(async file => {
-            const downloadURL = await uploadFile(file)
-            .then(url => {return url;}).catch(error => {
-                alert('Failure During Upload');
-                console.error(error);
-                return false;
-            });
-            images.push(downloadURL);
-        });
-        console.log(images);
+        // create data model for ojt_template
         let ojt_template = {
             active: true,
             no_of_attempts: 0,
@@ -145,19 +146,63 @@ const CreateOjt = props => {
             record_id: 1
         };
         // add to collection
-        const ojt_ref = await db.collection('ojt_templates').doc();
+        const ojt_ref = db.collection('ojt_templates').doc();
         ojt_template.record_id = ojt_ref;
-        console.log(ojt_ref);
         ojt_ref.set(ojt_template).then(_ => {
-            alert('OJT Added');
+            setBackdrpFlag(false);
+            setMaskingText('');
+            setSnackbar(true);
+            clearAll();
         }).catch(error => {
             alert('Error creating OJT');
             console.error(error);
         });
     };
 
+    // WIP
+    const validateAndCreateOjt = async _ => {
+        // validate files, ojt name
+        if (stringIsEmpty(ojtName) || questionnaire.length < 1) {
+            if (stringIsEmpty(ojtName)) {
+                alert('OJT Name is missing');
+            }
+            if (questionnaire.length < 1) {
+                alert('OJT must consist of atleast one Question.');
+            }
+        } else {
+            // upload images ans fetch download urls
+            if (filesList.length === 0) {
+                setMaskingText('Creating OJT...');
+                setBackdrpFlag(true);
+                uploadOJT([]);
+            } else {
+                setMaskingText('Uploading images...');
+                setBackdrpFlag(true);
+                Promise.all(filesList.map(async file => {
+                    return await uploadFile(file);
+                })).then(values => {
+                    setMaskingText('Creating OJT...')
+                    uploadOJT(values);
+                }).catch(error => {
+                    setBackdrpFlag(false);
+                    setMaskingText('');
+                    console.error(error);
+                    alert('Error uploading images');
+                });
+
+            }
+        }
+    };
+
     return (
         <Jumbotron>
+            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
+                <div className={classes.snackbarStyle} > OJT created Successfully! </div>
+            </Snackbar>
+            <Backdrop className={classes.backdrop} open={backdropFlag}>
+                <CircularProgress style={{ 'color': 'white' }} size={25} />
+                    &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
+            </Backdrop>
             <Modal show={open} onHide={handleClose} animation={true}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Question</Modal.Title>
@@ -190,9 +235,10 @@ const CreateOjt = props => {
                         onClick={clearAll}
                     > Clear All </Button> &nbsp;
             <Button
-            disabled={questionnaire.length === 0 || stringIsEmpty(ojtName)} 
-            onClick={validateAndCreateOjt}
-            variant={'success'}> Submit OJT </Button>
+                        disabled={questionnaire.length === 0 || stringIsEmpty(ojtName)
+                        || dueDate.getTime() <= new Date().getTime()}
+                        onClick={validateAndCreateOjt}
+                        variant={'success'}> Submit OJT </Button>
                 </Col>
             </Row>
 
@@ -206,12 +252,17 @@ const CreateOjt = props => {
                         > <IoMdAddCircle /> Add Question</Button>
                     </Col>
                     <Col md={4}>
+                        <InputGroup>
+                        <InputGroup.Prepend>
+                        <InputGroup.Text> Due Date </InputGroup.Text>
+                        </InputGroup.Prepend>
                         <FormControl
-                        value={dueDate.toISOString().substr(0,10)}
-                        type={'date'}
-                        placeholder={'Due Date'}
-                        onChange={(val)=>{setDueDate(val.target.valueAsDate)}}
+                            value={dueDate.toISOString().substr(0, 10)}
+                            type={'date'}
+                            placeholder={'Due Date'}
+                            onChange={(val) => { setDueDate(val.target.valueAsDate) }}
                         />
+                        </InputGroup>
                     </Col>
                     <Col md={4}>
                         <Button variant={'info'}
