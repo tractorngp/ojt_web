@@ -7,7 +7,7 @@ import { Modal, Button } from "react-bootstrap";
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
-
+import styles from './../../App.css';
 const initialState = {
     group_id: null,
     name: null,
@@ -132,7 +132,7 @@ export const Groups = props => {
                     <CircularProgress style={{ 'color': 'white' }} size={20} />
                     &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
                 </Backdrop>
-                <Modal size={'lg'} show={open} onHide={handleClose} animation={false}>
+                <Modal size={'lg'} className={styles.info_modal} show={open} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Create Group</Modal.Title>
                     </Modal.Header>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
+import { Paper, TableContainer, makeStyles, CircularProgress, Switch, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import * as XLSX from 'xlsx';
@@ -8,7 +8,7 @@ import { IoMdPersonAdd, IoMdCheckmarkCircleOutline, IoMdRefreshCircle } from 're
 import { useForm } from 'react-hook-form';
 import { saltValue } from './../utils/environment.prod';
 import { FRESH_TOKEN } from '../utils/constants';
-import { ListGroup, Row, Col, FormGroup, Form, Button } from 'react-bootstrap';
+import { ListGroup, Row, Col, FormGroup, Form, Button, Modal, FormControl } from 'react-bootstrap';
 
 const PAGINATION_SIZE = 3;
 
@@ -25,14 +25,6 @@ const useStyles = makeStyles((theme) => ({
     background: '#4caf50'
   },
   modalBody: {
-    height: '60%',
-    width: ' 40%',
-    marginLeft: '30%',
-    background: 'white',
-    marginTop: '10vh',
-    padding: '2vh',
-    overflowX: 'hidden',
-    overflowY: 'auto'
   },
   bullet: {
     display: 'inline-block',
@@ -233,19 +225,16 @@ const Users = props => {
   const classes = useStyles();
 
   const createUserBody = (
-    <Card className={classes.modalBody}>
+    <div>
       <Backdrop className={classes.backdrop} open={backdropFlag}>
         <CircularProgress style={{ 'color': 'white' }} size={25} />
                     &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
       </Backdrop>
-      <form onSubmit={handleSubmit(submitUserForm)} >
+      <form onSubmit={()=>{}} >
         <CardContent>
-          <Typography component={'span'} className={classes.title} color="textPrimary" gutterBottom>
-            <h3> Create a User </h3>
-          </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-            <input
-              className={classes.inputField} name="username" placeholder={'User Name'}
+            <FormControl
+            name="username" placeholder={'User Name'}
               ref={register({
                 required: 'Required',
                 validate: value => value !== '' || 'Field Required'
@@ -254,8 +243,8 @@ const Users = props => {
             <p className={classes.errorMessage}>{errors.username && errors.username.message ? errors.username.message : null}</p>
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-            <input
-              className={classes.inputField} name='tokenId' placeholder={'Token ID'}
+            <FormControl
+            name='tokenId' placeholder={'Token ID'}
               ref={register({
                 required: 'Required',
                 pattern: {
@@ -267,8 +256,7 @@ const Users = props => {
             <p className={classes.errorMessage}> {errors.tokenId && errors.tokenId.message ? errors.tokenId.message : null} </p>
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-            <select defaultValue={'user'} name="role"
-              className={classes.inputField} placeholder={'Select a role'}
+            <Form.Control as={'select'} defaultValue={'user'} name="role"
               ref={register({
                 required: 'Required',
                 validate: value => value !== null || 'Please choose a role'
@@ -276,11 +264,11 @@ const Users = props => {
             >
               <option value={'admin'}> Admin </option>
               <option value={'user'}> User </option>
-            </select>
+            </Form.Control>
             <p className={classes.errorMessage}> {errors.role && errors.role.message ? errors.role.message : null} </p>
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-            <input name={'email'}
+            <FormControl name={'email'}
               ref={register({
                 required: 'Required',
                 pattern: {
@@ -288,36 +276,23 @@ const Users = props => {
                   message: "Invalid email address"
                 }
               })}
-              className={classes.inputField} type={'email'} placeholder={'Email Address'} />
+            type={'email'} placeholder={'Email Address'} />
             <p className={classes.errorMessage}>{errors.email && errors.email.message ? errors.email.message : null}</p>
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-            <input name={'password'}
+            <FormControl name={'password'}
               ref={register({
                 required: 'Required',
                 pattern: {
                   value: passwordRegex,
                   message: 'Password must be 8 characters, atleast one uppercase, special char'
                 }
-              })}
-              className={classes.inputField} type={'password'} placeholder={'Password'} />
+              })} type={'password'} placeholder={'Password'} />
             <p className={classes.errorMessage}> {errors.password && errors.password.message ? errors.password.message : null} </p>
-          </Typography>
-          <Typography className={classes.title} color="textSecondary" gutterBottom>
-            <Button type={'submit'} style={{ padding: '15px 50px 15px 50px' }}
-              size="small" variant={'success'} color="primary">
-              Submit &nbsp;
-            <IoMdCheckmarkCircleOutline />
-            </Button>
-            &nbsp; &nbsp;
-            <Button type={'button'} onClick={() => setUserModal(false)} style={{ padding: '15px 50px 15px 50px' }}
-              size="small" variant={'light'} color="secondary">
-              Cancel
-            </Button>
           </Typography>
         </CardContent>
       </form>
-    </Card>
+    </div>
   );
 
   return (
@@ -329,17 +304,26 @@ const Users = props => {
         <CircularProgress style={{ 'color': 'white' }} size={25} />
                     &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
       </Backdrop>
-      <Modal
-        open={userModal}
-        onClose={() => setUserModal(false)}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
+      <Modal size={'lg'} show={userModal} onHide={()=>setUserModal(false)} animation={true}>
+          <Modal.Header closeButton>
+            <Modal.Title>Create User</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
         {createUserBody}
+        </Modal.Body>
+        <Modal.Footer>
+            <Button variant={'light'} onClick={() => setUserModal(false)}>
+              Cancel
+            </Button> &nbsp;
+            <Button variant={'success'} onClick={handleSubmit(submitUserForm)}
+            >Submit</Button>
+          </Modal.Footer>
       </Modal>
       <Button onClick={() => setUserModal(true)} variant={'outline-primary'} style={{ float: 'right' }} > <IoMdPersonAdd /> &nbsp; Create User </Button>
       <Button onClick={triggerFile} variant="contained" variant={'primary'}>Upload Users From Excel</Button>
-      <input ref={fileRef} style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
+      <input ref={fileRef} 
+      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" 
+      style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
       <br /><br />
       {
         userRows.length !== 0 ?

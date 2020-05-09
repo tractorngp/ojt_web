@@ -5,7 +5,7 @@ import { FormControl, InputGroup } from 'react-bootstrap';
 
 const useStyles = makeStyles(theme => ({
     filterList: {
-        maxHeight: '130px',
+        maxHeight: '30vh',
         overflowY: 'auto',
         overflowX: "hidden",
         listStyle: 'none'

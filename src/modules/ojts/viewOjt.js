@@ -68,6 +68,8 @@ const ViewOjt = props => {
             batch.commit().then( data => {
                 console.log(data);
                 alert('OJTs assigned succesfully');
+            }).catch(error => {
+                
             });
         });
     };

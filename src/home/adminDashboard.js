@@ -9,6 +9,16 @@ import {PendingOJTs} from '../modules/pendingOJTs';
 import { Navbar, Nav, Form } from 'react-bootstrap';
 import * as logo from './../assets/images/tractor_pg.png';
 import MainOjtPage from '../modules/ojts/Ojt';
+import { getStorageItem, setStorageItem } from '../utils/sessionStorageService';
+import { nullChecker, stringIsNotEmpty } from '../utils/commonUtils';
+
+const getCurrentTab = _ => {
+  const currentTab = window.sessionStorage.getItem('currentTab');
+  if(stringIsNotEmpty(currentTab)){
+    return currentTab;
+  }
+  return null;
+};
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -45,9 +55,12 @@ const drawerSegments = [
 export default function AdminDashboard(props) {
   const classes = useStyles();
   const { state } = React.useContext(UserContext);
-  const [bodyCase, switchBodyCase] = React.useState(bodyDivs.USERS);
+  const currentTab = getCurrentTab();
+  const [bodyCase, switchBodyCase] = React.useState(currentTab ? currentTab :bodyDivs.USERS);
+
 
   const BodyDiv = _ => {
+    window.sessionStorage.setItem('currentTab',bodyCase);
     switch (bodyCase) {
       case bodyDivs.CREATE_OJT:
         return (
@@ -96,7 +109,7 @@ export default function AdminDashboard(props) {
 </Navbar>
 
       {/* selective divs */}
-      <div style={{ marginTop: '7vh' }}>
+      <div style={{ marginTop: '1vh' }}>
         <BodyDiv />
       </div>
     </div>

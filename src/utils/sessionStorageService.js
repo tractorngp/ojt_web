@@ -4,7 +4,6 @@ import crypto from 'crypto-js';
 export const setStorageItem = (key, value) => {
     const valueAsString = JSON.stringify(value);
     const encryptedValue = crypto.AES.encrypt(valueAsString,key).toString();
-    console.log(encryptedValue);
     window.sessionStorage.setItem(key, encryptedValue);
 };
 

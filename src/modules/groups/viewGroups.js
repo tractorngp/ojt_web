@@ -174,8 +174,8 @@ const ViewGroups = props => {
           <Modal.Footer>
             <Button variant={'light'} onClick={handleClose}>
               Cancel
-                        </Button> &nbsp;
-                        <Button variant={'success'}
+            </Button> &nbsp;
+            <Button variant={'success'}
               disabled={!(nullChecker(groupState.name) && groupState.name.length > 0 
                 && listEmptyChecker(selectedTokenState.selectedTokenIds) )}
               onClick={saveGroup}
