@@ -5,10 +5,15 @@ import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
 import { ListGroup, Row, Col, FormGroup, Form } from 'react-bootstrap';
+import ReactPaginate from 'react-paginate';
+import '../App.css';
 
 const initialState = {
     name:null,
-    active: false
+    active: false,
+    nor : 10,
+    page: 0,
+    currentPage: 0
 };
 
 
@@ -34,6 +39,8 @@ function createData(active, assigned_to, group_id, images, no_of_attempts, ojt_n
 export const PendingOJTs = props => {
     const classes = useStyles();
     const [pendingOJTrows, setOJTs] = React.useState([]);
+    const [totalOJTsCount, setTotalCount] = React.useState([]);
+    const [assigned_ojts_full, setAssignedOJTs] = React.useState([]);
     const [open, setOpen] = React.useState(false);
     const { state } = React.useContext(UserContext);
     const [openSnackbar, setSnackbar] = React.useState(false);
@@ -46,27 +53,65 @@ export const PendingOJTs = props => {
     }
 
 
-    const handleStatusSwitch = (val, row) => {
-        const toggleStatus = val.target.checked;
-        const record_id = row.record_id;
-        db.collection('assigned_ojts').doc(String(record_id))
+    const handleStatusSwitch = async (val, row) => {  
+      const toggleStatus = val.target.checked;
+      const record_id = row.record_id;
+      // const res1 = await record_id.get();
+      // const recId = res1.data() ? res1.data().record_id : null
+        db.collection('assigned_ojts').doc(record_id)
           .update({
             active: toggleStatus
+          }).then((res) => {
+            console.log("Save successs")
+            setSnackbar(true);
+            getAllPendingOJTs();
+          }).catch(error => {
+            console.log(error);
+            alert('Update status Failed');
           })
-      };
+    };
+
+    const handlePageClick = data => {
+      let selected = data.selected;
+      initialState.currentPage = selected;
+      let slicedList = [];
+      slicedList = assigned_ojts_full.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+      setOJTs(slicedList);
+      console.log("Load new pages")
+      
+      // getAssignedOJTsCount();
+    };
+
+    const getAssignedOJTsCount = async _ => {
+      firebase.functions()
+      .httpsCallable('getCollectionQueryTotalCount')({"collection": "assigned_ojts", "isActiveRequired": false})
+      .then(response => {
+        console.log("Response received!")
+        let toc = (response != null ? response.data.total : 0);
+        setTotalCount(toc);
+        getAllPendingOJTs();
+      }, error => {
+        console.log(error);
+        alert('Error fetching count');
+      });
+    };
 
     const getAllPendingOJTs = async _ => {
         var ref = state.tokenId
-        const userRef = db.collection('users').doc(ref);
+        console.log(initialState.currentPage);
+        setOJTs([]);
+
         db.collection('assigned_ojts')
-            .where('active', "==", true)
-            .where('status', "==", 'assigned')
-            .orderBy('group_id', 'asc')
-            .onSnapshot(snapshot => {
+        // .where('active', "==", true)
+        .where('status', "==", 'assigned')
+        .orderBy('group_id', 'asc')
+        // .limit(initialState.nor)
+        .onSnapshot(snapshot => {
             const assigned_ojts = snapshot.docs;
             const tempList = [];
             var i = 0;
             if(assigned_ojts != null && assigned_ojts.length > 0){
+                setTotalCount(assigned_ojts.length);
                 assigned_ojts.forEach(async (user) => {
                     const docData = user.data();
                     const ref1 = docData.assigned_to
@@ -78,29 +123,33 @@ export const PendingOJTs = props => {
                     tempList.push(createData(docData.active, docData.assigned_to, docData.group_id, docData.images, docData.no_of_attempts, docData.ojt_name, docData.questions, docData.record_id, docData.status, docData.assigned_date, docData.due_date, docData.q_type, docData.group_name, docData.assigned_to_name));
                     i++;
                     if(i == assigned_ojts.length){
-                        setOJTs(tempList);
+                        let slicedList = tempList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+                        setAssignedOJTs(tempList);
+                        setOJTs(slicedList);
                     }
                 });
             }
             else{
                 setOJTs(tempList);
             }
-            
-            }, error => {
+          }, error => {
             console.log(error);
-            alert('Error Fetching Users');
+            alert('Error Fetching OJTs');
         })
+        
     };
 
 
     React.useEffect(_ => {
-        getAllPendingOJTs();
-      }, []);
+      // setPage(0);
+      // getAssignedOJTsCount();
+      getAllPendingOJTs();
+    }, []);
 
     return (
         <div>
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
-          <div className={classes.snackbarStyle} > Pending OJTs fetched successfully! </div>
+          <div className={classes.snackbarStyle} > OJT updated successfully! </div>
         </Snackbar>
         <Backdrop className={classes.backdrop} open={backdropFlag}>
           <CircularProgress style={{ 'color': 'white' }} size={25} />
@@ -124,7 +173,7 @@ export const PendingOJTs = props => {
                       <Col xs={2} md={2} lg={2} xl={2} >
                         Group
                             </Col>
-                      <Col xs={1} md={1} lg={1} xl={1} >
+                      <Col xs={2} md={2} lg={2} xl={2} >
                         Status
                             </Col>
                       <Col xs={2} md={2} lg={2} xl={2} >
@@ -150,7 +199,7 @@ export const PendingOJTs = props => {
                         <Col xs={2} md={2} lg={2} xl={2} >
                           {row.group_name != null ? row.group_name : ""}
                         </Col>
-                        <Col xs={1} md={1} lg={1} xl={1} >
+                        <Col xs={2} md={2} lg={2} xl={2} >
                           {row.active ? 'Active' : 'Inactive'}
                           <Tooltip title="Toggle Status" aria-label="Toggle Status">
                             <Switch
@@ -177,6 +226,19 @@ export const PendingOJTs = props => {
                   ))}
                 </ListGroup>
               </TableContainer>
+              <ReactPaginate
+                previousLabel={'previous'}
+                nextLabel={'next'}
+                breakLabel={'...'}
+                breakClassName={'break-me'}
+                pageCount={Math.ceil(totalOJTsCount / initialState.nor)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageClick}
+                containerClassName={'pagination'}
+                subContainerClassName={'pages pagination'}
+                activeClassName={'active'}
+              />
             </div>
             :
             <div style={{ marginTop: '10vh' }}>
