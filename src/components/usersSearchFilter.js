@@ -5,7 +5,7 @@ import { FormControl, InputGroup } from 'react-bootstrap';
 
 const useStyles = makeStyles(theme => ({
     filterList: {
-        maxHeight: '30vh',
+        maxHeight: '20vh',
         overflowY: 'auto',
         overflowX: "hidden",
         listStyle: 'none'
@@ -22,7 +22,6 @@ const UsersSearchFilter = ({ users, roles, selectedIds }) => {
     const { groupState, groupDispatch, selectedTokenState, selectedTokenDispatch }
      = React.useContext(GroupContext);
     const consolidateUsers = _ => {
-        console.log(groupState, selectedTokenState);
         setUsersList(users.map(x => {
             let selected = false;
             if(selectedIds !== null && selectedIds !== undefined){
@@ -88,7 +87,7 @@ const UsersSearchFilter = ({ users, roles, selectedIds }) => {
                     usersList.filter(x => {
                         return x.role === 'admin' &&
                             (searchAdminText !== null && searchAdminText !== '' ?
-                                x.user.name.includes(String(searchAdminText)) || String(x.user.tokenId).includes(String(searchAdminText))
+                                x.user.name.toLocaleLowerCase().includes(String(searchAdminText).toLocaleLowerCase()) || String(x.user.tokenId).includes(String(searchAdminText).toLocaleLowerCase())
                                 : true);
                     }).map(user => (
                         <li key={user.user.tokenId} style={{ textAlign: 'left' }}> <p> <Checkbox
@@ -111,7 +110,7 @@ const UsersSearchFilter = ({ users, roles, selectedIds }) => {
                     usersList.filter(x => {
                         return x.role === 'user' &&
                             (searchUserText !== null && searchUserText !== '' ?
-                                x.user.name.includes(String(searchUserText)) || String(x.user.tokenId).includes(String(searchUserText))
+                                x.user.name.toLocaleLowerCase().includes(String(searchUserText).toLocaleLowerCase()) || String(x.user.tokenId).includes(String(searchUserText).toLocaleLowerCase())
                                 : true);
                     }).map(user => (
                         <li key={user.user.tokenId} style={{ textAlign: 'left' }}><p> <Checkbox

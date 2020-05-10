@@ -4,11 +4,13 @@ import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import * as bcrypt from 'bcryptjs';
-import { IoMdPersonAdd, IoMdCheckmarkCircleOutline, IoMdRefreshCircle } from 'react-icons/io';
+import { IoMdPersonAdd, IoMdCheckmarkCircleOutline, IoMdRefreshCircle, IoMdSettings } from 'react-icons/io';
 import { useForm } from 'react-hook-form';
 import { saltValue } from './../utils/environment.prod';
 import { FRESH_TOKEN } from '../utils/constants';
-import { ListGroup, Row, Col, FormGroup, Form, Button, Modal, FormControl } from 'react-bootstrap';
+import { ListGroup, Row, Col, FormGroup, Form, Button, Modal, FormControl, Container, Table, DropdownButton, Dropdown } from 'react-bootstrap';
+import {PageLoaderComponent} from '../components/pageLoaderComponent';
+import { MdMoreVert } from 'react-icons/md';
 
 const PAGINATION_SIZE = 3;
 
@@ -48,6 +50,9 @@ const useStyles = makeStyles((theme) => ({
   backdrop: {
     zIndex: theme.zIndex.drawer + 100,
     color: '#fff',
+  },
+  lastTableData: {
+    width: '3% !important',
   }
 }));
 
@@ -59,6 +64,7 @@ const Users = props => {
   const db = firebase.firestore();
   const [userRows, setUsers] = React.useState([]);
   const fileRef = React.useRef(null);
+  const [loading, setLoading] = React.useState(true);
   const [currentPage, setCurrentPage] = React.useState(0);
   const [maxSize, setMaxSize] = React.useState(0);
   const [userModal, setUserModal] = React.useState(false);
@@ -80,15 +86,9 @@ const Users = props => {
   }
 
   const getAllUsers = async _ => {
-    // console.log('hey');
-    // const allList = await db.collection('users').get();
-    // const size = allList.docs;
-    // console.log(size);
-    // setMaxSize(size);
+    setLoading(true);
     db.collection('users')
       .orderBy('role')
-      //  .startAt(currentPage * PAGINATION_SIZE)
-      //  .limit(PAGINATION_SIZE)
       .onSnapshot(snapshot => {
         const users = snapshot.docs;
         const tempList = [];
@@ -97,8 +97,10 @@ const Users = props => {
           tempList.push(createData(docData.name, docData.tokenId, docData.email, docData.role, docData.active));
         });
         setUsers(tempList);
+        setLoading(false);
       }, error => {
         console.log(error);
+        setLoading(false);
         alert('Error Fetching Users');
       })
   };
@@ -168,7 +170,7 @@ const Users = props => {
   }
 
   const handleStatusSwitch = (val, row) => {
-    const toggleStatus = val.target.checked;
+    const toggleStatus = !val;
     const tokenId = row.tokenid;
     db.collection('users').doc(String(tokenId))
       .update({
@@ -230,11 +232,11 @@ const Users = props => {
         <CircularProgress style={{ 'color': 'white' }} size={25} />
                     &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
       </Backdrop>
-      <form onSubmit={()=>{}} >
+      <form onSubmit={() => { }} >
         <CardContent>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
             <FormControl
-            name="username" placeholder={'User Name'}
+              name="username" placeholder={'User Name'}
               ref={register({
                 required: 'Required',
                 validate: value => value !== '' || 'Field Required'
@@ -244,7 +246,7 @@ const Users = props => {
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
             <FormControl
-            name='tokenId' placeholder={'Token ID'}
+              name='tokenId' placeholder={'Token ID'}
               ref={register({
                 required: 'Required',
                 pattern: {
@@ -256,7 +258,7 @@ const Users = props => {
             <p className={classes.errorMessage}> {errors.tokenId && errors.tokenId.message ? errors.tokenId.message : null} </p>
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-            <Form.Control as={'select'} defaultValue={'user'} name="role"
+            <Form.Control as={'select'} placeholder={'Select a Role'} defaultValue={''} name="role"
               ref={register({
                 required: 'Required',
                 validate: value => value !== null || 'Please choose a role'
@@ -276,7 +278,7 @@ const Users = props => {
                   message: "Invalid email address"
                 }
               })}
-            type={'email'} placeholder={'Email Address'} />
+              type={'email'} placeholder={'Email Address'} />
             <p className={classes.errorMessage}>{errors.email && errors.email.message ? errors.email.message : null}</p>
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
@@ -304,97 +306,94 @@ const Users = props => {
         <CircularProgress style={{ 'color': 'white' }} size={25} />
                     &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
       </Backdrop>
-      <Modal size={'lg'} show={userModal} onHide={()=>setUserModal(false)} animation={true}>
-          <Modal.Header closeButton>
-            <Modal.Title>Create User</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-        {createUserBody}
+      <Modal size={'lg'} show={userModal} onHide={() => setUserModal(false)} animation={true}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create User</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {createUserBody}
         </Modal.Body>
         <Modal.Footer>
-            <Button variant={'light'} onClick={() => setUserModal(false)}>
-              Cancel
+          <Button variant={'light'} onClick={() => setUserModal(false)}>
+            Cancel
             </Button> &nbsp;
             <Button variant={'success'} onClick={handleSubmit(submitUserForm)}
-            >Submit</Button>
-          </Modal.Footer>
+          >Submit</Button>
+        </Modal.Footer>
       </Modal>
-      <Button onClick={() => setUserModal(true)} variant={'outline-primary'} style={{ float: 'right' }} > <IoMdPersonAdd /> &nbsp; Create User </Button>
-      <Button onClick={triggerFile} variant="contained" variant={'primary'}>Upload Users From Excel</Button>
-      <input ref={fileRef} 
-      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" 
-      style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
+      <Button onClick={() => setUserModal(true)} variant={'outline-danger'} style={{ float: 'right' }} > <IoMdPersonAdd /> &nbsp; Create User </Button>
+      <Button onClick={triggerFile} variant="contained" variant={'danger'}>Upload Users From Excel</Button>
+      <input ref={fileRef}
+        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+        style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
       <br /><br />
       {
-        userRows.length !== 0 ?
-          <div id="users-div">
-            <TableContainer component={Paper}>
-              <ListGroup style={{textAlign:'left'}}>
-                <ListGroup.Item active>
-                  <Row>
-                    <Col xs={2} md={2} lg={2} xl={2} >
-                      Employee ID
-                          </Col>
-                    <Col xs={2} md={2} lg={2} xl={2} >
-                      Name
-                    {/* <Form.Control type="text" placeholder="Name..." type={'search'} /> */}
-                          </Col>
-                    <Col xs={3} md={3} lg={3} xl={3} >
-                      Email
-                          </Col>
-                    <Col xs={2} md={2} lg={2} xl={2} >
-                      Role
-                          </Col>
-                    <Col xs={3} md={3} lg={3} xl={3} >
-                      Status
-                          </Col>
-                  </Row>
-                </ListGroup.Item>
-                {userRows.map((row) => (
-                  <ListGroup.Item key={row.tokenid}>
-                    <Row>
-                      <Col xs={2} md={2} lg={2} xl={2} >
-                        {row.tokenid}
-                      </Col>
-                      <Col xs={2} md={2} lg={2} xl={2} >
-                        {row.name}
-                      </Col>
-                      <Col xs={3} md={3} lg={3} xl={3} >
-                        {row.email}
-                      </Col>
-                      <Col xs={2} md={2} lg={2} xl={2} >
-                        {row.role.toLocaleUpperCase()}
-                      </Col>
-                      <Col xs={3} md={3} lg={3} xl={3} >
-                        {row.status ? 'Active' : 'Inactive'}
-                        <Tooltip title="Toggle Status" aria-label="Toggle Status">
-                          <Switch
-                            checked={row.status}
-                            onChange={(val) => { handleStatusSwitch(val, row) }}
-                            color="primary"
-                            name="statusSwitch"
-                            inputProps={{ 'aria-label': 'primary checkbox' }}
-                          />
-                        </Tooltip>
-                        <Tooltip title="Refresh Devices" aria-label="Refresh Devices">
-                          <Button size='small' variant={'light'} onClick={
-                            () => handleRefreshToken(row)
-                          }  > <IoMdRefreshCircle size={20} /> </Button>
-                        </Tooltip>
-                      </Col>
-                    </Row>
-
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </TableContainer>
-            {/* <Button disabled={currentPage===0} onClick={()=>{setCurrentPage(currentPage-1);getAllUsers();} } > Prev Page </Button>
-    <Button disabled={ currentPage >= maxSize } onClick={handleNextPage} > Next Page </Button> */}
-          </div>
-          :
-          <div style={{ marginTop: '10vh' }}>
-            <CircularProgress size={30} /> Fetching Users...
-    </div>
+        loading === true ? <PageLoaderComponent maskingText={'Fetching Users...'} /> :
+          <span>
+            {
+              userRows.length === 0 ?
+                <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
+                  <div> No Record to Show </div>
+                </Container>
+                :
+                <div id="users-div">
+                  <TableContainer component={'span'}>
+                    <Table striped bordered hover size="sm">
+                      <thead>
+                        <tr>
+                        <th> # </th>
+                        <th> Employee ID </th>
+                        <th> Name </th>
+                        <th> Email </th>
+                        <th> Role </th>
+                        <th> Status </th>
+                        <th>
+                          <IoMdSettings />
+                        </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {
+                          userRows.map((row, index) => (
+                            <tr key={index}>
+                              <td> {index+1} </td>
+                              <td> {row.tokenid} </td>
+                              <td> {row.name} </td>
+                              <td> {row.email} </td>
+                              <td> {row.role.toLocaleUpperCase()} </td>
+                              <td>
+                                {row.status ? 'Active' : 'Inactive'}
+                              </td>
+                              <td className={classes.lastTableData}>
+                                <DropdownButton variant={'link'}
+                                  title={
+                                    <div style={{ display: 'inline-block', textDecoration: 'none' }}>
+                                      <MdMoreVert size={25} style={{ color: 'black' }} />
+                                    </div>
+                                  }
+                                  id="basic-nav-dropdown"
+                                >
+                                  <Dropdown.Item
+                                    onClick={() => {
+                                      handleStatusSwitch(row.status, row)
+                                    }}
+                                  >
+                                    {row.status === false ? 'Activate User' : 'Deactivate User'}
+                                  </Dropdown.Item>
+                                  <Dropdown.Item onClick={() => handleRefreshToken(row)}>
+                                    Refresh Device Token
+                        </Dropdown.Item>
+                                </DropdownButton>
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </Table>
+                  </TableContainer>
+                </div>
+            }
+          </span>
       }
     </div>
   );

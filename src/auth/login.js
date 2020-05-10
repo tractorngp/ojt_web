@@ -1,6 +1,5 @@
 import React from 'react';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
 import { UserContext } from '../App';
 import { makeStyles, Backdrop, CircularProgress } from '@material-ui/core';
 import * as firebase from 'firebase';
@@ -11,6 +10,8 @@ import tractorPg from './../assets/images/tractor_pg.png';
 import mahindraRise from './../assets/images/mahindra_rise.png';
 import { IoMdArrowForward } from 'react-icons/io';
 import { setStorageItem } from '../utils/sessionStorageService';
+import { Button } from 'react-bootstrap';
+import { BackDropComponent } from '../components/pageLoaderComponent';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -112,10 +113,7 @@ const Login = props => {
 
     return (
         <div id="fc-login" className={classes.loginBox}>
-            <Backdrop className={classes.backdrop} open={loading}>
-                <CircularProgress style={{ 'color': 'white' }} size={25} />
-                    &nbsp;<p style={{ color: 'white' }}>Logging In...</p>
-            </Backdrop>
+            <BackDropComponent showBackdrop={loading} maskingText={'Logging In...'} />
             <form method={'POST'} ref={formRef}>
                 <div className={classes.headerImages}>
                     <img className={classes.headerImg} src={tractorPg} alt={''} />
@@ -126,7 +124,7 @@ const Login = props => {
                 <br /><br />
                 <TextField required name={'password'} className={classes.inputStyle} type={'password'} id="standard-basic" label="Enter Password" />
                 <br /><br />
-                <Button className={classes.loginBtn} onClick={handleLogin} disabled={loading} type={'submit'} name={'loginSubmit'} variant="contained" color="primary">
+                <Button className={classes.loginBtn} onClick={handleLogin} disabled={loading} type={'submit'} name={'loginSubmit'} variant="danger">
                     Sign In &nbsp; <IoMdArrowForward size={20} />
                 </Button>
             </form>

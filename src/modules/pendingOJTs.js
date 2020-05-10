@@ -4,10 +4,14 @@ import { Button, Paper, TableContainer, makeStyles, CircularProgress, Switch, Mo
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
-import { ListGroup, Row, Col, FormGroup, Form, Table } from 'react-bootstrap';
+import { ListGroup, Row, Col, FormGroup, Form, Table, Container, DropdownButton, Dropdown, Badge } from 'react-bootstrap';
+import Spinner from 'react-spinkit';
 import ReactPaginate from 'react-paginate';
 import '../App.css';
 import '../assets/styles/bootstrap.min.css';
+import {PageLoaderComponent} from '../components/pageLoaderComponent';
+import { MdMoreVert } from 'react-icons/md';
+import { IoMdSettings } from 'react-icons/io';
 
 const initialState = {
   name: null,
@@ -27,6 +31,9 @@ const useStyles = makeStyles(theme => ({
     padding: '20px',
     color: 'white',
     background: '#4caf50'
+  },
+  lastTableData: {
+    width: '3% !important',
   }
 }));
 
@@ -55,7 +62,7 @@ export const PendingOJTs = props => {
 
 
   const handleStatusSwitch = async (val, row) => {
-    const toggleStatus = val.target.checked;
+    const toggleStatus = !val;
     const record_id = row.record_id;
     // const res1 = await record_id.get();
     // const recId = res1.data() ? res1.data().record_id : null
@@ -149,7 +156,7 @@ export const PendingOJTs = props => {
 
   return (
     <div>
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
+      <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setSnackbar(false)}>
         <div className={classes.snackbarStyle} > OJT updated successfully! </div>
       </Snackbar>
       <Backdrop className={classes.backdrop} open={backdropFlag}>
@@ -170,37 +177,55 @@ export const PendingOJTs = props => {
                   <th>Assigned Date</th>
                   <th>Due Date</th>
                   <th>No Of Questions</th>
+                  <th>
+                    <IoMdSettings />
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {
-                  pendingOJTrows.map((row,index) => (
+                  pendingOJTrows.map((row, index) => (
                     <tr>
-                    <td> { (initialState.currentPage * initialState.nor) + (index+1)} </td>
-                    <td>{row.ojt_name}</td>
-                    <td>{row.assigned_to_name != null ? row.assigned_to_name : ""}</td>
-                    <td>{row.group_name != null ? row.group_name : ""}</td>
-                    <td>{row.active ? 'Active' : 'Inactive'}
-                    <Tooltip title="Toggle Status" aria-label="Toggle Status">
-                          <Switch
-                            checked={row.active}
-                            onChange={(val) => { handleStatusSwitch(val, row) }}
-                            color="primary"
-                            name="statusSwitch"
-                            inputProps={{ 'aria-label': 'primary checkbox' }}
-                          />
-                        </Tooltip>
-                    </td>
-                    <td>
-                    {row.assigned_date ? new Date(row.assigned_date).toLocaleDateString() : null}
-                    </td>
-                    <td>
-                    {row.due_date ? new Date(row.due_date).toLocaleDateString() : null}
-                    </td>
-                    <td>
-                    {row.questions != null ? row.questions.length : 0}
-                    </td>
-                  </tr>
+                      <td> {(initialState.currentPage * initialState.nor) + (index + 1)} </td>
+                      <td>{row.ojt_name}</td>
+                      <td>{row.assigned_to_name != null ? row.assigned_to_name : ""}</td>
+                      <td>{row.group_name != null ? row.group_name : ""}</td>
+                      <td>
+                        <Badge variant={row.active === true ? 'info' : 'warning'}>
+                      {row.active === true ? 'Active' : 'Inactive'}</Badge> &nbsp;
+                      { row.active === true ? 
+                      <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'danger'}>
+                      {new Date().getTime() < new Date(row.due_date).getTime() ? 'Pending' : 'Past Due Date'}
+                      </Badge>
+                      : null}
+                      </td>
+                      <td>
+                        {row.assigned_date ? new Date(row.assigned_date).toLocaleDateString() : null}
+                      </td>
+                      <td>
+                        {row.due_date ? new Date(row.due_date).toLocaleDateString() : null}
+                      </td>
+                      <td>
+                        {row.questions != null ? row.questions.length : 0}
+                      </td>
+                      <td className={classes.lastTableData}>
+                      <DropdownButton variant={'link'}
+                      title={
+                        <div style={{ display: 'inline-block', textDecoration: 'none' }}>
+                        <MdMoreVert size={25} style={{color:'black'}} />
+                        </div>
+                      }
+                      id="basic-nav-dropdown"
+                    >
+                      <Dropdown.Item
+                      onClick={()=>{
+                        handleStatusSwitch(row.active,row)}}
+                      >
+                        {row.active === true ? 'Revoke OJT' : 'Assign OJT'}
+                        </Dropdown.Item>
+                    </DropdownButton>
+                      </td>
+                    </tr>
                   ))
                 }
               </tbody>
@@ -228,9 +253,7 @@ export const PendingOJTs = props => {
             </div>
           </div>
           :
-          <div style={{ marginTop: '10vh' }}>
-            <CircularProgress size={30} /> Fetching Pending OJTs...
-      </div>
+          <PageLoaderComponent maskingText={'Fetching Pending OJTs...'} />
       }
     </div>
   );

@@ -100,7 +100,7 @@ const ViewOjt = props => {
             {
                 ojtTemplates.length > 0 ?
                 <ListGroup>
-                    <ListGroup.Item active> ALl OJTs </ListGroup.Item>
+                    <ListGroup.Item active> ALL OJTs </ListGroup.Item>
                 {
                     ojtTemplates.map(templateItem => (
                         <ListGroup.Item key={templateItem.ojt_name}>
@@ -120,18 +120,10 @@ const ViewOjt = props => {
                                         </Button>
                                     </Tooltip>
                                     &nbsp;
-                                    {
-                                        templateItem.active ? 
-                                        <Button
+                                    <Button
                                     onClick={()=>handleOpen(templateItem.record_id)}
                                     variant={'outline-info'} > <IoMdPeople /> Assign</Button>
-                                    :
-                                    <Tooltip title={!templateItem.active ? 'OJT has to be active to assign' : null}>
-                                    <Button
-                                    disabled={!templateItem.active}
-                                    variant={'outline-info'} > <IoMdPeople /> Assign</Button>
-                                    </Tooltip>
-                                    }
+                                    
                                     
                                 </Col>
                             </Row>

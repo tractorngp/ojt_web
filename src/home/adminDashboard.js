@@ -53,8 +53,6 @@ const drawerSegments = [
 ]
 
 export default function AdminDashboard(props) {
-  const classes = useStyles();
-  const { state } = React.useContext(UserContext);
   const currentTab = getCurrentTab();
   const [bodyCase, switchBodyCase] = React.useState(currentTab ? currentTab :bodyDivs.USERS);
 
@@ -86,7 +84,7 @@ export default function AdminDashboard(props) {
   return (
     <div className="admin_home" style={{ 'padding': '10px' }}>
       <Navbar bg="light" expand="lg">
-  <Navbar.Brand>
+  <Navbar.Brand style={{fontWeight:'500'}}>
   <img
         src={logo}
         width="30"
@@ -99,7 +97,7 @@ export default function AdminDashboard(props) {
   <Navbar.Collapse id="basic-navbar-nav">
     <Nav className="mr-auto">
       {drawerSegments.map((text,index)=> (
-        <Nav.Link style={bodyCase === text.id ? {color:'blue',background:'#eee',borderRadius:'5px'} :{color:'black'}  } key={index} onClick={() => { switchBodyCase(text.id) }}> {text.name} </Nav.Link>
+        <Nav.Link style={bodyCase === text.id ? {color:'#d9534f',background:'#eee',borderRadius:'5px',fontWeight:'600'} :{color:'black'}  } key={index} onClick={() => { switchBodyCase(text.id) }}> {text.name} </Nav.Link>
       ))}
     </Nav>
     <Form inline>
@@ -108,7 +106,6 @@ export default function AdminDashboard(props) {
   </Navbar.Collapse>
 </Navbar>
 
-      {/* selective divs */}
       <div style={{ marginTop: '1vh' }}>
         <BodyDiv />
       </div>

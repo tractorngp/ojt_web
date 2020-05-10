@@ -20,6 +20,7 @@
     "react-icons": "^3.9.0",
     "react-paginate": "^6.3.2",
     "react-scripts": "3.4.1",
+    "react-spinkit": "^3.0.0",
     "xlsx": "^0.15.6"
   },
   "scripts": {

@@ -7,6 +7,7 @@ import AdminDashboard from './home/adminDashboard';
 import Login from './auth/login';
 import { CircularProgress } from '@material-ui/core';
 import { getStorageItem } from './utils/sessionStorageService';
+import {PageLoaderComponent} from './components/pageLoaderComponent';
 
 const initialState = {
   tokenId: null,
@@ -67,7 +68,11 @@ function App() {
     <UserContext.Provider value={{ state,dispatch }}>
     <div className="App">
       {
-        state.loading === true ? <div style={{'marginTop':'30vh'}}> <CircularProgress size={15} /> Loading... </div> :
+        state.loading === true ? 
+        <div style={{marginTop:'30vh'}}>
+        <PageLoaderComponent maskingText={'Loading...'} />
+        </div>
+        :
         state.isLoggedIn === true ? <AdminDashboard role='admin' />
         : <Login />
       }

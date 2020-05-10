@@ -1,9 +1,9 @@
 import React from 'react';
 import { UserContext } from '../../App';
-import { Container, makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
+import { makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
 import ViewGroups from './viewGroups';
 import CreateGroup from './createGroup';
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Container } from "react-bootstrap";
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
@@ -150,8 +150,8 @@ export const Groups = props => {
                         >Submit</Button>
                     </Modal.Footer>
                 </Modal>
-                <Container>
-                    <Button onClick={() => setOpen(true)} color="primary" > + Create Group </Button>
+                <Container fluid>
+                    <Button onClick={() => setOpen(true)} variant={'danger'} > + Create Group </Button>
                     <br /> <br />
                     <ViewGroups state={state} />
                 </Container>
