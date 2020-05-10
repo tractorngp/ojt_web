@@ -1,10 +1,10 @@
 import React from 'react';
 import { UserContext } from '../App';
-import { Button, Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip } from '@material-ui/core';
+import { Button, Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip, FormControlLabel } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
-import { ListGroup, Row, Col, FormGroup, Form, Table, Container, DropdownButton, Dropdown, Badge } from 'react-bootstrap';
+import { ListGroup, Row, Col, FormGroup, Form, Table, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup } from 'react-bootstrap';
 import Spinner from 'react-spinkit';
 import ReactPaginate from 'react-paginate';
 import '../App.css';
@@ -54,6 +54,7 @@ export const PendingOJTs = props => {
   const [openSnackbar, setSnackbar] = React.useState(false);
   const [maskingText, setMaskingText] = React.useState('');
   const [backdropFlag, setBackdrpFlag] = React.useState(false);
+  const [dueDate, setDueDate] = React.useState(new Date());
   const db = firebase.firestore();
 
   const handleClose = _ => {
@@ -163,6 +164,50 @@ export const PendingOJTs = props => {
         <CircularProgress style={{ 'color': 'white' }} size={25} />
                       &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
       </Backdrop>
+
+      <div style={{ marginBottom: '5.0vh', marginRight: '10.0vh', marginTop: '5.0vh', display: 'flex', flexDirection: 'row-reverse' }} >
+          <OverlayTrigger
+            trigger="click"
+            key={'bottom'}
+            placement={'bottom'}
+            overlay={
+              <Popover id={`popover-positioned-${'bottom'}`}>
+                <Popover.Title as="h3">{'Filter By:'}</Popover.Title>
+                <Popover.Content>
+                <Form>
+                  <Form.Group controlId="formBasicOJTName">
+                    <Form.Label>OJT Name</Form.Label>
+                    <Form.Control type="text" placeholder="Enter OJT Name" />
+                  </Form.Group>
+
+                  <Form.Group controlId="formBasicAssignedTo">
+                    <Form.Label>Assigned To</Form.Label>
+                    <Form.Control type="text" placeholder="Enter Assigned To" />
+                  </Form.Group>
+
+                  <Form.Group controlId="formBasicDueDate">
+                    <Form.Label>Due Date (before)</Form.Label>
+                    <FormControl
+                      value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
+                      type={'date'}
+                      placeholder={'Due Date'}
+                      onChange={(val) => { setDueDate(val.target.valueAsDate) }}
+                    />
+                  </Form.Group>
+
+                  <Button variant="primary" type="submit">
+                    Submit
+                  </Button>
+                </Form>
+                </Popover.Content>
+              </Popover>
+            }
+          >
+            <Button variant="secondary">Filters</Button>
+          </OverlayTrigger>{' '}
+        </div>
+        
+
       {
         pendingOJTrows.length !== 0 ?
           <div id="pending-ojts-div">
