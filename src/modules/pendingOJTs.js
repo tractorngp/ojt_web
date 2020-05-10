@@ -164,6 +164,9 @@ export const PendingOJTs = props => {
   }
 
   const clearFilters = async _ => {
+    setOjtName("");
+    setAssignedTo("");
+    setDueDate("");
     let tempList = assigned_ojts_full.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
     setOJTs(tempList);
   }
