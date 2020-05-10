@@ -1,10 +1,10 @@
 import React from 'react';
 import { UserContext } from '../App';
-import { Button, Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip, FormControlLabel } from '@material-ui/core';
+import {  Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip, FormControlLabel } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
-import { ListGroup, Row, Col, FormGroup, Form, Table, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup } from 'react-bootstrap';
+import { ListGroup, Row, Col, FormGroup, Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup } from 'react-bootstrap';
 import Spinner from 'react-spinkit';
 import ReactPaginate from 'react-paginate';
 import '../App.css';
@@ -12,6 +12,7 @@ import '../assets/styles/bootstrap.min.css';
 import {PageLoaderComponent} from '../components/pageLoaderComponent';
 import { MdMoreVert } from 'react-icons/md';
 import { IoMdSettings } from 'react-icons/io';
+import * as moment from 'moment'
 
 const initialState = {
   name: null,
@@ -48,13 +49,15 @@ export const PendingOJTs = props => {
   const classes = useStyles();
   const [pendingOJTrows, setOJTs] = React.useState([]);
   const [totalOJTsCount, setTotalCount] = React.useState([]);
+  const [ojtName, setOjtName] = React.useState([]);
+  const [assignedTo, setAssignedTo] = React.useState([]);
+  const [dueDate, setDueDate] = React.useState(new Date());
   const [assigned_ojts_full, setAssignedOJTs] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const { state } = React.useContext(UserContext);
   const [openSnackbar, setSnackbar] = React.useState(false);
   const [maskingText, setMaskingText] = React.useState('');
   const [backdropFlag, setBackdrpFlag] = React.useState(false);
-  const [dueDate, setDueDate] = React.useState(new Date());
   const db = firebase.firestore();
 
   const handleClose = _ => {
@@ -105,6 +108,66 @@ export const PendingOJTs = props => {
       });
   };
 
+  const filterOJTsWithFields = async _ => {
+    let tempList1 = [];
+    let tempList2 = [];
+    let tempList3 = [];
+    
+    if(assigned_ojts_full != null && assigned_ojts_full.length > 0){
+      if(ojtName != null && ojtName.trim() != ""){
+        tempList1 = await assigned_ojts_full.filter(rec => {
+          if(rec['ojt_name'].includes(ojtName)){
+            return rec;
+          }
+        });
+      }
+      else{
+        tempList1 = assigned_ojts_full;
+      }
+
+      if(assignedTo != null && assignedTo.trim() != ""){
+        tempList2 = await tempList1.filter(rec => {
+          if(rec['assigned_to_name'].includes(assignedTo)){
+            return rec;
+          }
+        })
+      }
+      else{
+        tempList2 = tempList1;
+      }
+
+      if(dueDate != null && dueDate != ""){
+        tempList3 = await tempList2.filter(rec => {
+          let d1 = new Date(rec['due_date']);
+          let d2 = new Date(dueDate);
+          d1.setHours(0,0,0,0);
+          d2.setHours(0,0,0,0);
+          if(moment(d1).diff(d2, 'days') >= 0){
+            return rec;
+          }
+        })
+      }
+      else{
+        tempList3 = tempList2;
+      }
+
+      setTotalCount(tempList3.length);
+      
+      tempList3 = tempList3.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+      
+      setOJTs(tempList3);
+    }
+    else{
+      console.log("No results to return");
+    }
+    
+  }
+
+  const clearFilters = async _ => {
+    let tempList = assigned_ojts_full.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+    setOJTs(tempList);
+  }
+
   const getAllPendingOJTs = async _ => {
     var ref = state.tokenId
     console.log(initialState.currentPage);
@@ -152,6 +215,8 @@ export const PendingOJTs = props => {
   React.useEffect(_ => {
     // setPage(0);
     // getAssignedOJTsCount();
+    setOjtName("");
+    setAssignedTo("");
     getAllPendingOJTs();
   }, []);
 
@@ -169,6 +234,7 @@ export const PendingOJTs = props => {
           <OverlayTrigger
             trigger="click"
             key={'bottom'}
+            rootClose
             placement={'bottom'}
             overlay={
               <Popover id={`popover-positioned-${'bottom'}`}>
@@ -177,12 +243,12 @@ export const PendingOJTs = props => {
                 <Form>
                   <Form.Group controlId="formBasicOJTName">
                     <Form.Label>OJT Name</Form.Label>
-                    <Form.Control type="text" placeholder="Enter OJT Name" />
+                    <Form.Control type="text" placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)}/>
                   </Form.Group>
 
                   <Form.Group controlId="formBasicAssignedTo">
                     <Form.Label>Assigned To</Form.Label>
-                    <Form.Control type="text" placeholder="Enter Assigned To" />
+                    <Form.Control type="text" placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)}/>
                   </Form.Group>
 
                   <Form.Group controlId="formBasicDueDate">
@@ -195,8 +261,11 @@ export const PendingOJTs = props => {
                     />
                   </Form.Group>
 
-                  <Button variant="primary" type="submit">
+                  <Button variant='success' onClick={() => filterOJTsWithFields()}>
                     Submit
+                  </Button>
+                  <Button variant='light' onClick={() => clearFilters()}>
+                    Clear
                   </Button>
                 </Form>
                 </Popover.Content>
