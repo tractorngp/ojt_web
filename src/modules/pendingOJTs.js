@@ -168,7 +168,7 @@ export const PendingOJTs = props => {
   const clearFilters = async _ => {
     setOjtName("");
     setAssignedTo("");
-    setDueDate("");
+    setDueDate(new Date());
     let tempList = assigned_ojts_full.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
     setOJTs(tempList);
   }
@@ -233,7 +233,7 @@ export const PendingOJTs = props => {
       </Snackbar>
       <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
 
-      <div style={{ marginBottom: '5.0vh', marginRight: '10.0vh', marginTop: '5.0vh', display: 'flex', flexDirection: 'row-reverse' }} >
+      <div style={{ marginBottom: '1.0vh', marginRight: '10.0vh', marginTop: '1.0vh', display: 'flex', flexDirection: 'row-reverse' }} >
           <OverlayTrigger
             trigger="click"
             key={'bottom'}

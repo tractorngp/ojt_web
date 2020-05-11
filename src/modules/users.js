@@ -116,7 +116,7 @@ const Users = props => {
           tokenId: user.tokenId,
           role: user.role !== null ? user.role : '',
           email: user.email !== null ? user.email : '',
-          hpw: hpw,
+          hpw: rawpw,
           name: user.name !== null ? user.name : '',
           active: true,
           deviceToken: FRESH_TOKEN
@@ -201,7 +201,7 @@ const Users = props => {
         setMaskingText('Uploading...');
         const userData = {
           name: values.username,
-          hpw: bcrypt.hashSync(values.password, saltValue),
+          hpw: values.password,
           role: values.role,
           active: true,
           email: values.email,
