@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserContext } from '../../App';
-import { makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
+import { makeStyles, Snackbar } from '@material-ui/core';
 import ViewGroups from './viewGroups';
 import CreateGroup from './createGroup';
 import { Modal, Button, Container } from "react-bootstrap";
@@ -8,6 +8,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
 import styles from './../../App.css';
+import { BackDropComponent } from '../../components/pageLoaderComponent';
 const initialState = {
     group_id: null,
     name: null,
@@ -20,10 +21,6 @@ const selectedTokenInitialState = {
 };
 
 const useStyles = makeStyles(theme => ({
-    backdrop: {
-        zIndex: theme.zIndex.drawer + 100,
-        color: '#fff',
-    },
     snackbarStyle: {
         padding: '20px',
         color: 'white',
@@ -128,10 +125,7 @@ export const Groups = props => {
                 <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
                     <div className={classes.snackbarStyle} > Group Created Successfully! </div>
                 </Snackbar>
-                <Backdrop className={classes.backdrop} open={backdropFlag}>
-                    <CircularProgress style={{ 'color': 'white' }} size={20} />
-                    &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
-                </Backdrop>
+                <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
                 <Modal size={'lg'} className={styles.info_modal} show={open} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Create Group</Modal.Title>

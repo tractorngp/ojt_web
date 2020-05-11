@@ -9,7 +9,8 @@ import { nullChecker, listEmptyChecker, stringIsEmpty } from '../../utils/common
 
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { Backdrop, Snackbar, CircularProgress } from '@material-ui/core';
+import { Snackbar } from '@material-ui/core';
+import { BackDropComponent } from '../../components/pageLoaderComponent';
 
 const useStyles = makeStyles(theme => ({
     createContainer: {
@@ -21,9 +22,6 @@ const useStyles = makeStyles(theme => ({
         padding: '20px',
         color: 'white',
         background: '#4caf50'
-    }, backdrop: {
-        zIndex: theme.zIndex.drawer + 100,
-        color: '#fff',
     }
 }));
 
@@ -57,6 +55,7 @@ const CreateOjt = props => {
     const [openSnackbar, setSnackbar] = React.useState(false);
     const [maskingText, setMaskingText] = React.useState('');
     const [backdropFlag, setBackdrpFlag] = React.useState(false);
+    const timeWhenLoaded = new Date().getTime();
 
     const uploadFile = async file => {
         const f = file;
@@ -131,7 +130,7 @@ const CreateOjt = props => {
 
     }
 
-    const uploadOJT = images => {
+    const uploadOJT = async images => {
         const now = new Date().toISOString();
         // create data model for ojt_template
         let ojt_template = {
@@ -144,9 +143,10 @@ const CreateOjt = props => {
             images: images
         };
         // add to collection
-        const ojt_ref = db.collection('ojt_templates').doc();
+        const ojt_ref = db.collection('ojt_templates').doc().id;
+        console.log(ojt_ref);
         ojt_template.record_id = ojt_ref;
-        ojt_ref.set(ojt_template).then(_ => {
+        db.collection('ojt_templates').doc(ojt_ref).set(ojt_template).then(_ => {
             setBackdrpFlag(false);
             setMaskingText('');
             setSnackbar(true);
@@ -197,10 +197,7 @@ const CreateOjt = props => {
             <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
                 <div className={classes.snackbarStyle} > OJT created Successfully! </div>
             </Snackbar>
-            <Backdrop className={classes.backdrop} open={backdropFlag}>
-                <CircularProgress style={{ 'color': 'white' }} size={25} />
-                    &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
-            </Backdrop>
+            <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
             <Modal show={open} onHide={handleClose} animation={true}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Question</Modal.Title>
@@ -236,7 +233,7 @@ const CreateOjt = props => {
                     > Clear All </Button> &nbsp;
             <Button
                         disabled={questionnaire.length === 0 || stringIsEmpty(ojtName)
-                        || dueDate.getTime() <= new Date().getTime()}
+                        || dueDate.getTime() < timeWhenLoaded}
                         onClick={validateAndCreateOjt}
                         variant={'success'}> Submit OJT </Button>
                 </Col>

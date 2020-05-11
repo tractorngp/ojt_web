@@ -1,15 +1,15 @@
 import React from 'react';
-import { TableContainer, Paper, makeStyles, Switch, Chip, Tooltip, Snackbar, Backdrop, CircularProgress, MenuItem } from '@material-ui/core';
+import { TableContainer, makeStyles, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { IoMdCreate, IoMdMenu, IoIosMenu, IoMdOptions, IoMdSettings } from 'react-icons/io';
-import { Modal, ListGroup, Row, Col, Badge, Button, Table, DropdownButton, Dropdown, NavDropdown } from 'react-bootstrap';
+import { IoMdSettings } from 'react-icons/io';
+import { Modal, Badge, Button, Table, DropdownButton, Dropdown, NavDropdown, Container } from 'react-bootstrap';
 import CreateGroup from './createGroup';
 import { GroupContext } from './groups';
 import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
 import { MdMoreVert } from 'react-icons/md';
 import './../../App.css';
-import {PageLoaderComponent} from '../../components/pageLoaderComponent';
+import { PageLoaderComponent, BackDropComponent } from '../../components/pageLoaderComponent';
 
 const useStyles = makeStyles((theme) => ({
   table: {
@@ -23,10 +23,6 @@ const useStyles = makeStyles((theme) => ({
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary,
-  },
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 100,
-    color: '#fff',
   },
   snackbarStyle: {
     padding: '20px',
@@ -162,10 +158,7 @@ const ViewGroups = props => {
 
   return (
     <div>
-      <Backdrop className={classes.backdrop} open={backdropFlag}>
-        <CircularProgress style={{ 'color': 'white' }} size={20} />
-                  &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
-      </Backdrop>
+      <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
       <TableContainer component={'span'}>
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
           <div className={classes.snackbarStyle} > Group Updated Successfully! </div>
@@ -190,59 +183,69 @@ const ViewGroups = props => {
             >Submit</Button>
           </Modal.Footer>
         </Modal>
-        {groups.length === 0 ? 
-        <PageLoaderComponent maskingText={'Fetching Groups...'} />
-        :
-          <Table striped bordered hover size="sm">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Members</th>
-                <th>Status</th>
-                <th>Last Modified</th>
-                <th>
-                  <IoMdSettings size={18} />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {groups.map((row, index) => (
-                <tr key={index}>
-                  <td>{index+1}</td>
-                  <td>{row.name}</td>
-                  <td> {row.group_members.length} </td>
-                  <td>
-                    <Badge variant={row.active === true ? 'info' : 'warning'}>
-                      {row.active === true ? 'Active' : 'Inactive'}</Badge>
-                  </td>
-                  <td>
-                    {nullChecker(row.modifiedDate) ?
-                      new Date(row.modifiedDate).toLocaleDateString() + '-' + new Date(row.modifiedDate).toLocaleTimeString()
-                      : 
-                      new Date(row.createdDate).toLocaleDateString() + '-' + new Date(row.createdDate).toLocaleTimeString()} 
-                  </td>
-                  <td className={classes.lastTableData}>
-                    <DropdownButton variant={'link'}
-                      title={
-                        <div style={{ display: 'inline-block', textDecoration: 'none' }}>
-                        <MdMoreVert size={25} style={{color:'black'}} />
-                        </div>
-                      }
-                      id="basic-nav-dropdown"
-                    >
-                      <Dropdown.Item
-                      onClick={()=>{
-                        console.log('hi');
-                        toggleGroupStatus(row.active,row.group_id)}}
-                      >Toggle Status</Dropdown.Item>
-                      <Dropdown.Item onClick={()=>editGroup(row)}>Edit Group</Dropdown.Item>
-                    </DropdownButton>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+        {
+          loading === true ?
+            <PageLoaderComponent maskingText={'Fetching Groups...'} />
+            :
+            <span>
+              {groups.length === 0 ?
+                <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
+                  <div> No Records to Show </div>
+                </Container>
+                :
+                <Table striped bordered hover size="sm">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Members</th>
+                      <th>Status</th>
+                      <th>Last Modified</th>
+                      <th>
+                        <IoMdSettings size={18} />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {groups.map((row, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{row.name}</td>
+                        <td> {row.group_members.length} </td>
+                        <td>
+                          <Badge variant={row.active === true ? 'info' : 'warning'}>
+                            {row.active === true ? 'Active' : 'Inactive'}</Badge>
+                        </td>
+                        <td>
+                          {nullChecker(row.modifiedDate) ?
+                            new Date(row.modifiedDate).toLocaleDateString() + '-' + new Date(row.modifiedDate).toLocaleTimeString()
+                            :
+                            new Date(row.createdDate).toLocaleDateString() + '-' + new Date(row.createdDate).toLocaleTimeString()}
+                        </td>
+                        <td className={classes.lastTableData}>
+                          <DropdownButton variant={'link'}
+                            title={
+                              <div style={{ display: 'inline-block', textDecoration: 'none' }}>
+                                <MdMoreVert size={25} style={{ color: 'black' }} />
+                              </div>
+                            }
+                            id="basic-nav-dropdown"
+                          >
+                            <Dropdown.Item
+                              onClick={() => {
+                                console.log('hi');
+                                toggleGroupStatus(row.active, row.group_id)
+                              }}
+                            >Toggle Status</Dropdown.Item>
+                            <Dropdown.Item onClick={() => editGroup(row)}>Edit Group</Dropdown.Item>
+                          </DropdownButton>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              }
+            </span>
         }
       </TableContainer>
     </div>

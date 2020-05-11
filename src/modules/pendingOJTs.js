@@ -9,11 +9,11 @@ import Spinner from 'react-spinkit';
 import ReactPaginate from 'react-paginate';
 import '../App.css';
 import '../assets/styles/bootstrap.min.css';
-import {PageLoaderComponent} from '../components/pageLoaderComponent';
+import {PageLoaderComponent, BackDropComponent} from '../components/pageLoaderComponent';
 import { MdMoreVert } from 'react-icons/md';
 import { IoMdSettings } from 'react-icons/io';
 
-const initialState = {
+const initialPageState = {
   name: null,
   active: false,
   nor: 10,
@@ -37,8 +37,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const GroupContext = React.createContext();
-
 function createData(active, assigned_to, group_id, images, no_of_attempts, ojt_name, questions, record_id, status, assigned_date, due_date, q_type, group_name, assigned_to_name) {
   return { active, assigned_to, group_id, images, no_of_attempts, ojt_name, questions, record_id, status, assigned_date, due_date, q_type, group_name, assigned_to_name };
 }
@@ -54,6 +52,8 @@ export const PendingOJTs = props => {
   const [openSnackbar, setSnackbar] = React.useState(false);
   const [maskingText, setMaskingText] = React.useState('');
   const [backdropFlag, setBackdrpFlag] = React.useState(false);
+  const [ loading, setLoading ] = React.useState(true);
+  const [ paginationState, setPaginationState ] = React.useState(initialPageState);
   const db = firebase.firestore();
 
   const handleClose = _ => {
@@ -81,7 +81,9 @@ export const PendingOJTs = props => {
 
   const handlePageClick = data => {
     let selected = data.selected;
-    initialState.currentPage = selected;
+    paginationState.currentPage = selected;
+    let initialState = paginationState;
+    setPaginationState(paginationState);
     let slicedList = [];
     slicedList = assigned_ojts_full.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
     setOJTs(slicedList);
@@ -105,10 +107,8 @@ export const PendingOJTs = props => {
   };
 
   const getAllPendingOJTs = async _ => {
-    var ref = state.tokenId
-    console.log(initialState.currentPage);
-    setOJTs([]);
-
+    setLoading(true);
+    var ref = state.tokenId;
     db.collection('assigned_ojts')
       // .where('active', "==", true)
       .where('status', "==", 'assigned')
@@ -131,19 +131,22 @@ export const PendingOJTs = props => {
             tempList.push(createData(docData.active, docData.assigned_to, docData.group_id, docData.images, docData.no_of_attempts, docData.ojt_name, docData.questions, docData.record_id, docData.status, docData.assigned_date, docData.due_date, docData.q_type, docData.group_name, docData.assigned_to_name));
             i++;
             if (i == assigned_ojts.length) {
+              let initialState = paginationState;
               let slicedList = tempList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
               setAssignedOJTs(tempList);
               setOJTs(slicedList);
+              setLoading(false);
             }
           });
         }
         else {
           setOJTs(tempList);
+          setLoading(false);
         }
       }, error => {
         console.log(error);
         alert('Error Fetching OJTs');
-      })
+      });
 
   };
 
@@ -159,12 +162,18 @@ export const PendingOJTs = props => {
       <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setSnackbar(false)}>
         <div className={classes.snackbarStyle} > OJT updated successfully! </div>
       </Snackbar>
-      <Backdrop className={classes.backdrop} open={backdropFlag}>
-        <CircularProgress style={{ 'color': 'white' }} size={25} />
-                      &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
-      </Backdrop>
+      <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
       {
-        pendingOJTrows.length !== 0 ?
+        loading === true ? 
+        <PageLoaderComponent maskingText={'Fetching Pending OJTs...'} /> 
+        :
+         <span>
+           {
+        pendingOJTrows.length === 0 ?
+        <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
+                  <div> No Records to Show </div>
+        </Container>
+        :
           <div id="pending-ojts-div">
             <Table striped bordered hover size="sm">
               <thead>
@@ -186,7 +195,7 @@ export const PendingOJTs = props => {
                 {
                   pendingOJTrows.map((row, index) => (
                     <tr>
-                      <td> {(initialState.currentPage * initialState.nor) + (index + 1)} </td>
+                      <td> {(paginationState.currentPage * paginationState.nor) + (index + 1)} </td>
                       <td>{row.ojt_name}</td>
                       <td>{row.assigned_to_name != null ? row.assigned_to_name : ""}</td>
                       <td>{row.group_name != null ? row.group_name : ""}</td>
@@ -235,7 +244,7 @@ export const PendingOJTs = props => {
                 previousLabel={'<<'}
                 nextLabel={'>>'}
                 breakLabel={'...'}
-                pageCount={Math.ceil(totalOJTsCount / initialState.nor)}
+                pageCount={Math.ceil(totalOJTsCount / paginationState.nor)}
                 marginPagesDisplayed={2}
                 pageRangeDisplayed={5}
                 onPageChange={handlePageClick}
@@ -249,11 +258,12 @@ export const PendingOJTs = props => {
                 nextClassName={'page-item'}
                 nextLinkClassName={'page-link'}
                 activeClassName={'active'}
+                forcePage={paginationState.currentPage}
               />
             </div>
           </div>
-          :
-          <PageLoaderComponent maskingText={'Fetching Pending OJTs...'} />
+      }
+         </span> 
       }
     </div>
   );

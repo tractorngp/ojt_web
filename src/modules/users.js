@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { saltValue } from './../utils/environment.prod';
 import { FRESH_TOKEN } from '../utils/constants';
 import { ListGroup, Row, Col, FormGroup, Form, Button, Modal, FormControl, Container, Table, DropdownButton, Dropdown } from 'react-bootstrap';
-import {PageLoaderComponent} from '../components/pageLoaderComponent';
+import {PageLoaderComponent, BackDropComponent} from '../components/pageLoaderComponent';
 import { MdMoreVert } from 'react-icons/md';
 
 const PAGINATION_SIZE = 3;
@@ -46,10 +46,6 @@ const useStyles = makeStyles((theme) => ({
   },
   errorMessage: {
     color: 'red'
-  },
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 100,
-    color: '#fff',
   },
   lastTableData: {
     width: '3% !important',
@@ -228,10 +224,7 @@ const Users = props => {
 
   const createUserBody = (
     <div>
-      <Backdrop className={classes.backdrop} open={backdropFlag}>
-        <CircularProgress style={{ 'color': 'white' }} size={25} />
-                    &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
-      </Backdrop>
+      <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
       <form onSubmit={() => { }} >
         <CardContent>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
@@ -258,12 +251,13 @@ const Users = props => {
             <p className={classes.errorMessage}> {errors.tokenId && errors.tokenId.message ? errors.tokenId.message : null} </p>
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-            <Form.Control as={'select'} placeholder={'Select a Role'} defaultValue={''} name="role"
+            <Form.Control as={'select'} placeholder={'Select a Role'} name="role"
               ref={register({
                 required: 'Required',
-                validate: value => value !== null || 'Please choose a role'
+                validate: value => value !== null && value !== 'none' || 'Please choose a role'
               })}
             >
+              <option value={'none'} selected disabled hidden> Select a Role </option>
               <option value={'admin'}> Admin </option>
               <option value={'user'}> User </option>
             </Form.Control>
@@ -302,10 +296,7 @@ const Users = props => {
       <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
         <div className={classes.snackbarStyle} > User Created Successfully! </div>
       </Snackbar>
-      <Backdrop className={classes.backdrop} open={backdropFlag}>
-        <CircularProgress style={{ 'color': 'white' }} size={25} />
-                    &nbsp;<p style={{ color: 'white' }}>{maskingText}</p>
-      </Backdrop>
+      <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
       <Modal size={'lg'} show={userModal} onHide={() => setUserModal(false)} animation={true}>
         <Modal.Header closeButton>
           <Modal.Title>Create User</Modal.Title>
@@ -333,7 +324,7 @@ const Users = props => {
             {
               userRows.length === 0 ?
                 <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
-                  <div> No Record to Show </div>
+                  <div> No Records to Show </div>
                 </Container>
                 :
                 <div id="users-div">

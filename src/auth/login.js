@@ -1,7 +1,7 @@
 import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import { UserContext } from '../App';
-import { makeStyles, Backdrop, CircularProgress } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import * as firebase from 'firebase';
 import 'firebase/auth';
 import 'firebase/firestore';
@@ -32,10 +32,6 @@ const useStyles = makeStyles((theme) => ({
             marginLeft: '35%',
             width: '30%',
         }
-    },
-    backdrop: {
-        zIndex: theme.zIndex.drawer + 1,
-        color: '#fff',
     },
     loginBtn: {
         padding: '15px 50px 15px 50px'

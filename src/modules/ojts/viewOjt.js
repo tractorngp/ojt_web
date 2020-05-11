@@ -2,9 +2,10 @@ import React from 'react';
 import { Container, ListGroup, Row, Col, Button, Badge, Modal } from 'react-bootstrap';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { CircularProgress, Tooltip, makeStyles } from '@material-ui/core';
+import { CircularProgress, Tooltip, makeStyles, Snackbar } from '@material-ui/core';
 import { IoMdInformationCircleOutline, IoMdPeople } from 'react-icons/io';
 import AssignOJT from './assignOjt';
+import { BackDropComponent } from '../../components/pageLoaderComponent';
 
 const OJT_TEMPLATES = 'ojt_templates';
 const useStyles = makeStyles(theme => ({
@@ -12,7 +13,12 @@ const useStyles = makeStyles(theme => ({
         maxHeight: '80vh',
         overflowY: 'auto',
         overflowX: 'hidden'
-    }
+    },
+  snackbarStyle: {
+    padding: '20px',
+    color: 'white',
+    background: '#4caf50'
+  }
 }));
 
 const ViewOjt = props => {
@@ -22,6 +28,10 @@ const ViewOjt = props => {
     const [ open, setOpen ] = React.useState(false);
     const [ assignToGroups, assignToGroupsDispatch ] = React.useState([]);
     const [ selectedOJT, setSelectedOJT ] = React.useState(null);
+    const [ showBackdrop, setBackdrop ] = React.useState(false);
+    const [ maskingText, setMaskingText ] = React.useState('');
+    const [ openSnackbar, setSnackbar ] = React.useState(false);
+    const [ snackBarText, setsbarText ] = React.useState('');
 
     const fetchOjts = _ => {
         db.collection(OJT_TEMPLATES).onSnapshot( templatesSnapshot => {
@@ -45,9 +55,9 @@ const ViewOjt = props => {
     };
 
     const submitAssigning = _ => {
-        console.log(selectedOJT);
-        console.log(assignToGroups);
-        selectedOJT.get().then(val => {
+        setMaskingText('Assigning OJT...');
+        setBackdrop(true);
+        db.collection('ojt_templates').doc(selectedOJT).get().then(val => {
             let ojtsToAssign = [];
             const ojtTemplate = val.data();
             assignToGroups.forEach(group => {
@@ -66,10 +76,13 @@ const ViewOjt = props => {
                 batch.set(db.collection('assigned_ojts').doc(),ojtToAssign);
             });
             batch.commit().then( data => {
-                console.log(data);
-                alert('OJTs assigned succesfully');
+                setOpen(false);
+                setBackdrop(false);
+                setsbarText('OJTs Assigned Successfully'); setSnackbar(true);
+                setMaskingText('');
             }).catch(error => {
-                
+                alert('Error while assigning OJT');
+                console.log(error);
             });
         });
     };
@@ -80,6 +93,10 @@ const ViewOjt = props => {
 
     return (
         <Container className={classes.viewOjtContainer}>
+            <BackDropComponent maskingText={maskingText} showBackdrop={showBackdrop} />
+            <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setSnackbar(false)}>
+                    <div className={classes.snackbarStyle} > {snackBarText} </div>
+                </Snackbar>
             <Modal show={open} onHide={handleClose} animation={false}>
           <Modal.Header closeButton>
             <Modal.Title>Assign To Groups</Modal.Title>
