@@ -5,7 +5,7 @@ import 'firebase/firestore';
 import { CircularProgress, Tooltip, makeStyles, Snackbar } from '@material-ui/core';
 import { IoMdInformationCircleOutline, IoMdPeople, IoMdAdd } from 'react-icons/io';
 import AssignOJT from './assignOjt';
-import { BackDropComponent } from '../../components/pageLoaderComponent';
+import { BackDropComponent, PageLoaderComponent } from '../../components/pageLoaderComponent';
 
 const OJT_TEMPLATES = 'ojt_templates';
 const useStyles = makeStyles(theme => ({
@@ -33,12 +33,16 @@ const ViewOjt = props => {
     const [maskingText, setMaskingText] = React.useState('');
     const [openSnackbar, setSnackbar] = React.useState(false);
     const [snackBarText, setsbarText] = React.useState('');
+    const [ loading, setLoading ] = React.useState(true);
 
     const fetchOjts = _ => {
+        setLoading(true);
         db.collection(OJT_TEMPLATES).onSnapshot(templatesSnapshot => {
             let tempList = templatesSnapshot.docs.map(doc => doc.data());
             setOjtTemplates(tempList);
+            setLoading(false);
         }, error => {
+            setLoading(false);
             console.error(error);
             alert('Database Error');
         });
@@ -118,10 +122,15 @@ const ViewOjt = props => {
             </Modal>
             
                 <div style={{ display:'flex', flexDirection: 'row-reverse', width:'100%', marginTop:'1.0vh', marginBottom: '1.0vh' }}><Button variant="danger" style={{width:'10%'}}><IoMdAdd size={25} /></Button></div>
-               { 
+                {
+                    loading === true ?
+                    <span> <CircularProgress size={15} /> <p> Fetching OJT Templates... </p></span>
+                    :
+                    <span>
+{ 
                 ojtTemplates.length > 0 ?
                 <ListGroup>
-                        <ListGroup.Item style={{fontSize:'1.2rem', fontWeight: '700', color: '#d9534f', background:'#eeeeee'}}> ALL OJTs </ListGroup.Item>
+                        <ListGroup.Item style={{fontSize:'1.2rem', fontWeight: '700', color: '#d9534f', background:'#eeeeee'}}> ALL OJT Templates </ListGroup.Item>
                         {
                             ojtTemplates.map(templateItem => (
                                 <ListGroup.Item key={templateItem.ojt_name}>
@@ -151,10 +160,12 @@ const ViewOjt = props => {
                                 </ListGroup.Item>
                             ))}
                     </ListGroup>
-                 : <div id="loading-box">
-                        <span> <CircularProgress size={20} /> <p> Fetching OJTs... </p> </span>
+                 : <div id="no-records-box">
+                        <span> No Record to Show </span>
                     </div>
             }
+                    </span>
+                }
         </Container>
     );
 

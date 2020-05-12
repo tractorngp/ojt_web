@@ -77,7 +77,8 @@ const Users = props => {
   const [totalUsersCount, setUsersCount] = React.useState(0);
   const [editingUser, setEditingUser] = React.useState(null);
   const [snackBarText, setSnackbarText] = React.useState('');
-  let selectedUser = null;
+  const [ showDeletePrompt, setDeletePrompt ] = React.useState(false);
+  const [ userToDelete, setUserToDelete ] = React.useState(null);
   const { handleSubmit, register, errors } = useForm();
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
   const tokenIdRegex = /^[0-9]*$/;
@@ -285,86 +286,37 @@ const Users = props => {
       })
   };
 
-const classes = useStyles();
+  const closeDeletePrompt = _ => {
+    setDeletePrompt(false);
+    setUserToDelete(null);
+  };
 
-const createUserBody = (
-  <div>
-    <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
-    <form onSubmit={() => { }} >
-      <CardContent>
-        <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-          <FormControl
-            name="username" placeholder={'User Name'}
-            ref={register({
-              required: 'Required',
-              validate: value => value !== '' || 'Field Required'
-            })}
-          />
-          <p className={classes.errorMessage}>{errors.username && errors.username.message ? errors.username.message : null}</p>
-        </Typography>
-        <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-          <FormControl
-            name='tokenId' placeholder={'Token ID'}
-            ref={register({
-              required: 'Required',
-              pattern: {
-                value: tokenIdRegex,
-                message: 'Token ID can be only numeric'
-              }
-            })}
-          />
-          <p className={classes.errorMessage}> {errors.tokenId && errors.tokenId.message ? errors.tokenId.message : null} </p>
-        </Typography>
-        <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-          <Form.Control as={'select'} placeholder={'Select a Role'} name="role"
-            ref={register({
-              required: 'Required',
-              validate: value => value !== null && value !== 'none' || 'Please choose a role'
-            })}
-          >
-            <option value={'none'} selected disabled hidden> Select a Role </option>
-            <option value={'admin'}> Admin </option>
-            <option value={'user'}> User </option>
-          </Form.Control>
-          <p className={classes.errorMessage}> {errors.role && errors.role.message ? errors.role.message : null} </p>
-        </Typography>
-        <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-          <FormControl name={'email'}
-            ref={register({
-              required: 'Required',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                message: "Invalid email address"
-              }
-            })}
-            type={'email'} placeholder={'Email Address'} />
-          <p className={classes.errorMessage}>{errors.email && errors.email.message ? errors.email.message : null}</p>
-        </Typography>
-        <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
-          <FormControl name={'password'}
-            ref={register({
-              required: 'Required',
-              pattern: {
-                value: passwordRegex,
-                message: 'Password must be 8 characters, atleast one uppercase, special char'
-              }
-            })} type={'password'} placeholder={'Password'} />
-          <p className={classes.errorMessage}> {errors.password && errors.password.message ? errors.password.message : null} </p>
-        </Typography>
-      </CardContent>
-    </form>
-  </div>
-);
+  const deleteUser = tokenId => {
+    const userTokenId = '' + tokenId;
+    setMaskingText('Deleting User...');
+    setBackdrpFlag(true);
+    db.collection('users').doc(userTokenId).delete()
+    .then( _ => {
+      setBackdrpFlag(false); setMaskingText('');
+      setDeletePrompt(false); setUserToDelete(null);
+      alert('User Deleted Successfully');
+    }).catch(error => {
+      console.log(error);
+      setBackdrpFlag(false); setMaskingText('');
+      alert('Error Deleting User');
+    })
+  }
 
-const EditUserBody = ({ userInfo }) => {
-  return (
+  const classes = useStyles();
+
+  const createUserBody = (
     <div>
       <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
       <form onSubmit={() => { }} >
         <CardContent>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
             <FormControl
-              name="username" defaultValue={nullChecker(editingUser) ? editingUser.name : ''} placeholder={'User Name'}
+              name="username" placeholder={'User Name'}
               ref={register({
                 required: 'Required',
                 validate: value => value !== '' || 'Field Required'
@@ -375,7 +327,6 @@ const EditUserBody = ({ userInfo }) => {
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
             <FormControl
               name='tokenId' placeholder={'Token ID'}
-              defaultValue={nullChecker(editingUser) ? editingUser.tokenid : ''}
               ref={register({
                 required: 'Required',
                 pattern: {
@@ -388,7 +339,6 @@ const EditUserBody = ({ userInfo }) => {
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
             <Form.Control as={'select'} placeholder={'Select a Role'} name="role"
-              defaultValue={nullChecker(editingUser) ? editingUser.role : ''}
               ref={register({
                 required: 'Required',
                 validate: value => value !== null && value !== 'none' || 'Please choose a role'
@@ -402,7 +352,6 @@ const EditUserBody = ({ userInfo }) => {
           </Typography>
           <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
             <FormControl name={'email'}
-              defaultValue={nullChecker(editingUser) ? editingUser.email : ''}
               ref={register({
                 required: 'Required',
                 pattern: {
@@ -413,170 +362,264 @@ const EditUserBody = ({ userInfo }) => {
               type={'email'} placeholder={'Email Address'} />
             <p className={classes.errorMessage}>{errors.email && errors.email.message ? errors.email.message : null}</p>
           </Typography>
+          <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
+            <FormControl name={'password'}
+              ref={register({
+                required: 'Required',
+                pattern: {
+                  value: passwordRegex,
+                  message: 'Password must be 8 characters, atleast one uppercase, special char'
+                }
+              })} type={'password'} placeholder={'Password'} />
+            <p className={classes.errorMessage}> {errors.password && errors.password.message ? errors.password.message : null} </p>
+          </Typography>
         </CardContent>
       </form>
     </div>
-  )
+  );
 
-};
+  const EditUserBody = ({ userInfo }) => {
+    return (
+      <div>
+        <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
+        <form onSubmit={() => { }} >
+          <CardContent>
+            <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
+              <FormControl
+                name="username" defaultValue={nullChecker(editingUser) ? editingUser.name : ''} placeholder={'User Name'}
+                ref={register({
+                  required: 'Required',
+                  validate: value => value !== '' || 'Field Required'
+                })}
+              />
+              <p className={classes.errorMessage}>{errors.username && errors.username.message ? errors.username.message : null}</p>
+            </Typography>
+            <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
+              <FormControl
+                name='tokenId' placeholder={'Token ID'}
+                defaultValue={nullChecker(editingUser) ? editingUser.tokenid : ''}
+                ref={register({
+                  required: 'Required',
+                  pattern: {
+                    value: tokenIdRegex,
+                    message: 'Token ID can be only numeric'
+                  }
+                })}
+              />
+              <p className={classes.errorMessage}> {errors.tokenId && errors.tokenId.message ? errors.tokenId.message : null} </p>
+            </Typography>
+            <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
+              <Form.Control as={'select'} placeholder={'Select a Role'} name="role"
+                defaultValue={nullChecker(editingUser) ? editingUser.role : ''}
+                ref={register({
+                  required: 'Required',
+                  validate: value => value !== null && value !== 'none' || 'Please choose a role'
+                })}
+              >
+                <option value={'none'} selected disabled hidden> Select a Role </option>
+                <option value={'admin'}> Admin </option>
+                <option value={'user'}> User </option>
+              </Form.Control>
+              <p className={classes.errorMessage}> {errors.role && errors.role.message ? errors.role.message : null} </p>
+            </Typography>
+            <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
+              <FormControl name={'email'}
+                defaultValue={nullChecker(editingUser) ? editingUser.email : ''}
+                ref={register({
+                  required: 'Required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                type={'email'} placeholder={'Email Address'} />
+              <p className={classes.errorMessage}>{errors.email && errors.email.message ? errors.email.message : null}</p>
+            </Typography>
+          </CardContent>
+        </form>
+      </div>
+    )
 
-return (
-  <Container fluid style={{ maxWidth: '100%' }}>
-    <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
-      <div className={classes.snackbarStyle} > {snackBarText} </div>
-    </Snackbar>
-    <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
+  };
 
+  return (
+    <Container fluid style={{ maxWidth: '100%' }}>
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
+        <div className={classes.snackbarStyle} > {snackBarText} </div>
+      </Snackbar>
 
-    {/* Create User Modal */}
-    <Modal size={'lg'} show={userModal} onHide={() => setUserModal(false)} animation={true}>
+      {/* Delete User Prompt */}
+
+      <Modal size={'lg'} show={showDeletePrompt} onHide={closeDeletePrompt}>
+      <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
       <Modal.Header closeButton>
-        <Modal.Title>Create User</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {createUserBody}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant={'light'} onClick={() => setUserModal(false)}>
-          Cancel
+          <Modal.Title>Are you sure you want to Delete User - {userToDelete}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <p>This would delete the user, their assigned OJTs and involved groups.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant={'light'} onClick={closeDeletePrompt}>
+            Cancel
+            </Button> &nbsp;
+            <Button variant={'danger'} onClick={()=>deleteUser(userToDelete)}
+          >Submit</Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Create User Modal */}
+      <Modal size={'lg'} show={userModal} onHide={() => setUserModal(false)} animation={true}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create User</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {createUserBody}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant={'light'} onClick={() => setUserModal(false)}>
+            Cancel
             </Button> &nbsp;
             <Button variant={'success'} onClick={handleSubmit(submitUserForm)}
-        >Submit</Button>
-      </Modal.Footer>
-    </Modal>
+          >Submit</Button>
+        </Modal.Footer>
+      </Modal>
 
-    {/* Edit User Modal */}
-    <Modal size={'lg'} show={editUserModal} onHide={closeEditUser} animation={true}>
-      <Modal.Header closeButton>
-        <Modal.Title>Edit User</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <EditUserBody userInfo={editingUser} />
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant={'light'} onClick={closeEditUser}>
-          Cancel
+      {/* Edit User Modal */}
+      <Modal size={'lg'} show={editUserModal} onHide={closeEditUser} animation={true}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit User</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <EditUserBody userInfo={editingUser} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant={'light'} onClick={closeEditUser}>
+            Cancel
             </Button> &nbsp;
             <Button variant={'success'} onClick={handleSubmit(submitEditedUser)}
-        >Submit</Button>
-      </Modal.Footer>
-    </Modal>
+          >Submit</Button>
+        </Modal.Footer>
+      </Modal>
 
 
 
-    <Row style={{ maxWidth: '100%', marginBottom: '10px' }}>
-      <Col md={4}>
-      </Col>
-      <Col md={4}>
-        <Button onClick={triggerFile} variant="contained" variant={'danger'}>Upload Users From Excel</Button>
-        <input ref={fileRef}
-          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-          style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
-      </Col>
-      <Col md={4} style={{ textAlign: 'right' }}>
-        <Button variant={'secondary'}>Filter </Button> &nbsp;
+      <Row style={{marginBottom: '10px'}}>
+        <Col md={4}>
+        </Col>
+        <Col md={4}>
+          <Button onClick={triggerFile} variant="contained" variant={'danger'}>Upload Users From Excel</Button>
+          <input ref={fileRef}
+            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
+        </Col>
+        <Col md={4} style={{ display:'flex',flexDirection:'row-reverse',width:'100%' }}>
       <Button onClick={() => setUserModal(true)} variant={'outline-danger'} > <IoMdPersonAdd /> &nbsp; Create User </Button>
-      </Col>
-    </Row>
-    {
-      loading === true ? <PageLoaderComponent maskingText={'Fetching Users...'} /> :
-        <span>
-          {
-            visibleUserRows.length === 0 ?
-              <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
-                <div> No Records to Show </div>
-              </Container>
-              :
-              <div id="users-div">
-                <TableContainer component={'span'}>
-                  <Table striped bordered hover size="sm">
-                    <thead>
-                      <tr>
-                        <th> # </th>
-                        <th> Employee ID </th>
-                        <th> Name </th>
-                        <th> Email </th>
-                        <th> Role </th>
-                        <th> Status </th>
-                        <th>
-                          <IoMdSettings />
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {
-                        visibleUserRows.map((row, index) => (
-                          <tr key={index}>
-                            <td> {(paginationState.currentPage * paginationState.nor) + (index + 1)} </td>
-                            <td> {row.tokenid} </td>
-                            <td> {row.name} </td>
-                            <td> {row.email} </td>
-                            <td> {row.role.toLocaleUpperCase()} </td>
-                            <td>
-                              {row.status ? 'Active' : 'Inactive'}
-                            </td>
-                            <td className={classes.lastTableData}>
-                              <DropdownButton variant={'link'}
-                                title={
-                                  <div style={{ display: 'inline-block', textDecoration: 'none' }}>
-                                    <MdMoreVert size={25} style={{ color: 'black' }} />
-                                  </div>
-                                }
-                                id="basic-nav-dropdown"
-                              >
-                                <Dropdown.Item onClick={() => handleRefreshToken(row)}>
-                                  Refresh Device Token
-                                  </Dropdown.Item>
-                                <Dropdown.Item style={{ textAlign: 'end' }}
-                                  onClick={() => {
-                                    handleStatusSwitch(row.status, row)
-                                  }}
+      <Button style={{marginRight:'1rem'}} variant={'secondary'}>Filters </Button> &nbsp;
+        </Col>
+      </Row>
+      {
+        loading === true ? <PageLoaderComponent maskingText={'Fetching Users...'} /> :
+          <span>
+            {
+              visibleUserRows.length === 0 ?
+                <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
+                  <div> No Records to Show </div>
+                </Container>
+                :
+                <div id="users-div">
+                  <TableContainer component={'span'}>
+                    <Table striped bordered hover size="sm">
+                      <thead>
+                        <tr>
+                          <th> # </th>
+                          <th> Employee ID </th>
+                          <th> Name </th>
+                          <th> Email </th>
+                          <th> Role </th>
+                          <th> Status </th>
+                          <th>
+                            <IoMdSettings />
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {
+                          visibleUserRows.map((row, index) => (
+                            <tr key={index}>
+                              <td> {(paginationState.currentPage * paginationState.nor) + (index + 1)} </td>
+                              <td> {row.tokenid} </td>
+                              <td> {row.name} </td>
+                              <td> {row.email} </td>
+                              <td> {row.role.toLocaleUpperCase()} </td>
+                              <td>
+                                {row.status ? 'Active' : 'Inactive'}
+                              </td>
+                              <td className={classes.lastTableData}>
+                                <DropdownButton variant={'link'}
+                                  title={
+                                    <div style={{ display: 'inline-block', textDecoration: 'none' }}>
+                                      <MdMoreVert size={25} style={{ color: 'black' }} />
+                                    </div>
+                                  }
+                                  id="basic-nav-dropdown"
                                 >
-                                  {row.status === false ? 'Activate User' : 'Deactivate User'}
-                                </Dropdown.Item>
-                                <Dropdown.Item style={{ textAlign: 'end' }}
-                                  onClick={() => openEditUser(row)}
-                                > Edit User
+                                  <Dropdown.Item onClick={() => handleRefreshToken(row)}>
+                                    Refresh Device Token
                                   </Dropdown.Item>
-                                <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
-                                > <IoMdTrash /> Delete User
+                                  <Dropdown.Item style={{ textAlign: 'end' }}
+                                    onClick={() => {
+                                      handleStatusSwitch(row.status, row)
+                                    }}
+                                  >
+                                    {row.status === false ? 'Activate User' : 'Deactivate User'}
                                   </Dropdown.Item>
-                              </DropdownButton>
-                            </td>
-                          </tr>
-                        ))
-                      }
-                    </tbody>
-                  </Table>
-                </TableContainer>
-                <div style={{ marginTop: '0.5vh', display: 'flex', flexDirection: 'row-reverse', width: '100%' }} >
-                  <ReactPaginate
-                    previousLabel={'<<'}
-                    nextLabel={'>>'}
-                    breakLabel={'...'}
-                    pageCount={Math.ceil(totalUsersCount / paginationState.nor)}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={5}
-                    onPageChange={handlePageClick}
-                    breakClassName={'page-item'}
-                    breakLinkClassName={'page-link'}
-                    containerClassName={'pagination'}
-                    pageClassName={'page-item'}
-                    pageLinkClassName={'page-link'}
-                    previousClassName={'page-item'}
-                    previousLinkClassName={'page-link'}
-                    nextClassName={'page-item'}
-                    nextLinkClassName={'page-link'}
-                    activeClassName={'active'}
-                    forcePage={paginationState.currentPage}
-                  />
+                                  <Dropdown.Item style={{ textAlign: 'end' }}
+                                    onClick={() => openEditUser(row)}
+                                  > Edit User
+                                  </Dropdown.Item>
+                                  <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
+                                  onClick={()=> {
+                                    setUserToDelete(row.tokenid);
+                                    setDeletePrompt(true);
+                                  }}
+                                  > <IoMdTrash /> Delete User
+                                  </Dropdown.Item>
+                                </DropdownButton>
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </Table>
+                  </TableContainer>
+                  <div style={{ marginTop: '0.5vh', display: 'flex', flexDirection: 'row-reverse', width: '100%' }} >
+                    <ReactPaginate
+                      previousLabel={'<<'}
+                      nextLabel={'>>'}
+                      breakLabel={'...'}
+                      pageCount={Math.ceil(totalUsersCount / paginationState.nor)}
+                      marginPagesDisplayed={2}
+                      pageRangeDisplayed={5}
+                      onPageChange={handlePageClick}
+                      breakClassName={'page-item'}
+                      breakLinkClassName={'page-link'}
+                      containerClassName={'pagination'}
+                      pageClassName={'page-item'}
+                      pageLinkClassName={'page-link'}
+                      previousClassName={'page-item'}
+                      previousLinkClassName={'page-link'}
+                      nextClassName={'page-item'}
+                      nextLinkClassName={'page-link'}
+                      activeClassName={'active'}
+                      forcePage={paginationState.currentPage}
+                    />
+                  </div>
                 </div>
-              </div>
-          }
-        </span>
-    }
-  </Container>
-);
+            }
+          </span>
+      }
+    </Container>
+  );
 
 };
 

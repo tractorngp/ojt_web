@@ -4,7 +4,7 @@ import ViewOjt from './viewOjt';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { UserContext } from '../../App';
-import { nullChecker, listEmptyChecker } from '../../utils/commonUtils';
+import { nullChecker, listEmptyChecker, stringIsNotEmpty, stringIsEmpty } from '../../utils/commonUtils';
 import { Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip, FormControlLabel } from '@material-ui/core';
 import { ListGroup, Row, Col, FormGroup, Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup } from 'react-bootstrap';
 import Spinner from 'react-spinkit';
@@ -100,7 +100,7 @@ const MainOjtPage = props => {
         if (all_ojts_full != null && all_ojts_full.length > 0) {
             if (ojtName != null && ojtName.trim() != "") {
                 tempList1 = await all_ojts_full.filter(rec => {
-                    if (rec['ojt_name'].includes(ojtName)) {
+                    if (rec['ojt_name'].toLowerCase().includes(ojtName.toLowerCase())) {
                         return rec;
                     }
                 });
@@ -111,7 +111,7 @@ const MainOjtPage = props => {
 
             if (assignedTo != null && assignedTo.trim() != "") {
                 tempList2 = await tempList1.filter(rec => {
-                    if (rec['assigned_to_name'].includes(assignedTo)) {
+                    if (rec['assigned_to_name'].toLowerCase().includes(assignedTo.toLowerCase())) {
                         return rec;
                     }
                 })
@@ -126,7 +126,7 @@ const MainOjtPage = props => {
                     let d2 = new Date(dueDate);
                     d1.setHours(0, 0, 0, 0);
                     d2.setHours(0, 0, 0, 0);
-                    if (moment(d1).diff(d2, 'days') >= 0) {
+                    if (moment(d2).diff(d1, 'days') >= 0) {
                         return rec;
                     }
                 })
@@ -237,12 +237,12 @@ const MainOjtPage = props => {
                                                     <Form>
                                                         <Form.Group controlId="formBasicOJTName">
                                                             <Form.Label>OJT Name</Form.Label>
-                                                            <Form.Control type="text" placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)} />
+                                                            <Form.Control type="text" value={ojtName} placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)} />
                                                         </Form.Group>
 
                                                         <Form.Group controlId="formBasicAssignedTo">
                                                             <Form.Label>Assigned To</Form.Label>
-                                                            <Form.Control type="text" placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)} />
+                                                            <Form.Control type="text" value={assignedTo} placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)} />
                                                         </Form.Group>
 
                                                         <Form.Group controlId="formBasicDueDate">
@@ -255,9 +255,11 @@ const MainOjtPage = props => {
                                                             />
                                                         </Form.Group>
 
-                                                        <Button variant='success' onClick={() => filterOJTsWithFields()}>
+                                                        <Button variant='success'
+                                                        disabled={ stringIsEmpty(ojtName) && stringIsEmpty(assignedTo)  }
+                                                        onClick={() => filterOJTsWithFields()}>
                                                             Submit
-                                    </Button>
+                                    </Button>       &nbsp;
                                                         <Button variant='light' onClick={() => clearFilters()}>
                                                             Clear
                                     </Button>
