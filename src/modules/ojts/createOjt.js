@@ -193,7 +193,7 @@ const CreateOjt = props => {
     };
 
     return (
-        <Jumbotron style={{maxHeight:'80vh',overflowY:'auto',overflowX:'hidden'}}>
+        <Container style={{maxHeight:'80vh',overflowY:'auto',overflowX:'hidden'}}>
             <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
                 <div className={classes.snackbarStyle} > OJT created Successfully! </div>
             </Snackbar>
@@ -315,7 +315,7 @@ const CreateOjt = props => {
                     }
                 </Container>
             </Container>
-        </Jumbotron>
+        </Container>
     );
 
 };
