@@ -3,27 +3,24 @@ import { TableContainer, makeStyles, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { IoMdSettings } from 'react-icons/io';
-import { Modal, Badge, Button, Table, DropdownButton, Dropdown, NavDropdown, Container } from 'react-bootstrap';
+import { Modal, Badge, Button, Table, DropdownButton, Dropdown, NavDropdown, Container, OverlayTrigger, Popover, Form } from 'react-bootstrap';
 import CreateGroup from './createGroup';
 import { GroupContext } from './groups';
-import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
+import { nullChecker, listEmptyChecker, stringIsNotEmpty } from './../../utils/commonUtils';
 import { MdMoreVert } from 'react-icons/md';
 import './../../App.css';
 import { PageLoaderComponent, BackDropComponent } from '../../components/pageLoaderComponent';
+import ReactPaginate from 'react-paginate';
+
+const initialPageState = {
+  name: null,
+  active: false,
+  nor: 8,
+  page: 0,
+  currentPage: 0
+};
 
 const useStyles = makeStyles((theme) => ({
-  table: {
-    minWidth: 250,
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(15),
-    flexBasis: '33.33%',
-    flexShrink: 0,
-  },
-  secondaryHeading: {
-    fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
-  },
   snackbarStyle: {
     padding: '20px',
     color: 'white',
@@ -45,19 +42,37 @@ const ViewGroups = props => {
   const [openSnackbar, setSnackbar] = React.useState(false);
   const [maskingText, setMaskingText] = React.useState('');
   const [backdropFlag, setBackdrpFlag] = React.useState(false);
+  const [ paginationState, setPaginationState ] = React.useState(initialPageState);
+  const [ visibleGroupRows, setVisibleGroupRows ] = React.useState([]);
+  const [totalGroupsCount, setGroupsCount ] = React.useState(0);
+  const [ filteringGroupName, setFilteringGroupName ] = React.useState("");
 
   const fetchAllGroups = _ => {
     setLoading(true);
     db.collection('groups')
       .onSnapshot(groupsSnapshot => {
         const gList = groupsSnapshot.docs.map(snapShot => snapShot.data());
+        const slicedList = gList.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+        setGroupsCount(gList.length);
         setGroups(gList);
+        setVisibleGroupRows(slicedList);
         setLoading(false);
       }, error => {
         setLoading(false);
         alert('DB Error');
         console.error(error);
       });
+  };
+
+
+  const handlePageClick = data => {
+    let selected = data.selected;
+    paginationState.currentPage = selected;
+    let initialState = paginationState;
+    setPaginationState(paginationState);
+    let slicedList = [];
+    slicedList = groups.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+    setVisibleGroupRows(slicedList);
   };
 
   const toggleGroupStatus = (val, group_id) => {
@@ -152,6 +167,24 @@ const ViewGroups = props => {
       });
   };
 
+  const filterGroupsWithFields = _ => {
+    if(stringIsNotEmpty(filteringGroupName))
+    {
+      let filteredList = groups.filter(x => x.name.toLocaleLowerCase().includes(filteringGroupName.toLocaleLowerCase()));
+    setGroupsCount(filteredList.length);
+    filteredList = filteredList.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+    setVisibleGroupRows(filteredList);
+    }
+
+  };
+
+  const clearFilters = async _ => {
+    setFilteringGroupName("");
+    setGroupsCount(groups.length);
+    let tempList = groups.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+    setVisibleGroupRows(tempList);
+  }
+
   React.useEffect(_ => {
     fetchAllGroups();
   }, []);
@@ -160,9 +193,11 @@ const ViewGroups = props => {
     <div>
       <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
       <TableContainer component={'span'}>
+        {/* snack bar for info */}
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
           <div className={classes.snackbarStyle} > Group Updated Successfully! </div>
         </Snackbar>
+        {/*  Edit group modal  */}
         <Modal size={'xl'} show={open} onHide={handleClose} animation={false}>
           <Modal.Header closeButton>
             <Modal.Title>Edit Group</Modal.Title>
@@ -183,16 +218,54 @@ const ViewGroups = props => {
             >Submit</Button>
           </Modal.Footer>
         </Modal>
+
+        {/* Filtering Options */}
+        <div style={{ marginBottom: '1.0vh', marginRight: '10.0vh', marginTop: '1.0vh', display: 'flex', flexDirection: 'row-reverse' }} >
+          <OverlayTrigger
+            trigger="click"
+            key={'bottom'}
+            rootClose
+            placement={'bottom'}
+            overlay={
+              <Popover id={`popover-positioned-${'bottom'}`}>
+                <Popover.Title as="h3">{'Filter By:'}</Popover.Title>
+                <Popover.Content>
+                <Form>
+                  <Form.Group controlId="formBasicOJTName">
+                    <Form.Label>Group Name</Form.Label>
+                    <Form.Control type="text" value={filteringGroupName} placeholder="Enter Group Name" onChange={(val) => setFilteringGroupName(val.target.value)}/>
+                  </Form.Group>
+
+                  <Button 
+                  disabled={!(filteringGroupName !== null && filteringGroupName !== undefined && filteringGroupName.length > 0)}
+                   variant='success' onClick={filterGroupsWithFields}>
+                    Submit
+                  </Button>
+                  &nbsp;
+                  <Button variant='light' onClick={clearFilters}>
+                    Clear
+                  </Button>
+                </Form>
+                </Popover.Content>
+              </Popover>
+            }
+          >
+            <Button variant="secondary">Filters</Button>
+          </OverlayTrigger>{' '}
+        </div>
+
+        {/*  Groups Display  */}
         {
           loading === true ?
             <PageLoaderComponent maskingText={'Fetching Groups...'} />
             :
             <span>
-              {groups.length === 0 ?
+              {visibleGroupRows.length === 0 ?
                 <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
                   <div> No Records to Show </div>
                 </Container>
                 :
+                <div>
                 <Table striped bordered hover size="sm">
                   <thead>
                     <tr>
@@ -207,9 +280,9 @@ const ViewGroups = props => {
                     </tr>
                   </thead>
                   <tbody>
-                    {groups.map((row, index) => (
+                    {visibleGroupRows.map((row, index) => (
                       <tr key={index}>
-                        <td>{index + 1}</td>
+                        <td>{ (paginationState.currentPage * paginationState.nor) + (index + 1)}</td>
                         <td>{row.name}</td>
                         <td> {row.group_members.length} </td>
                         <td>
@@ -244,6 +317,29 @@ const ViewGroups = props => {
                     ))}
                   </tbody>
                 </Table>
+                <div style={{ marginTop: '0.5vh', display: 'flex', flexDirection: 'row-reverse', width: '100%' }} >
+                <ReactPaginate
+                previousLabel={'<<'}
+                nextLabel={'>>'}
+                breakLabel={'...'}
+                pageCount={Math.ceil(totalGroupsCount / paginationState.nor)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageClick}
+                breakClassName={'page-item'}
+                breakLinkClassName={'page-link'}
+                containerClassName={'pagination'}
+                pageClassName={'page-item'}
+                pageLinkClassName={'page-link'}
+                previousClassName={'page-item'}
+                previousLinkClassName={'page-link'}
+                nextClassName={'page-item'}
+                nextLinkClassName={'page-link'}
+                activeClassName={'active'}
+                forcePage={paginationState.currentPage}
+              />
+              </div>
+              </div>
               }
             </span>
         }
