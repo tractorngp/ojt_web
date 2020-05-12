@@ -219,8 +219,9 @@ export const PendingOJTs = props => {
 
 
   React.useEffect(_ => {
-    // setPage(0);
     // getAssignedOJTsCount();
+    paginationState.currentPage = 0;
+    initialPageState.currentPage = 0;
     setOjtName("");
     setAssignedTo("");
     getAllPendingOJTs();
