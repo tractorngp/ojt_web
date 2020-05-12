@@ -80,6 +80,7 @@ const ViewOjt = props => {
                 setBackdrop(false);
                 setsbarText('OJTs Assigned Successfully'); setSnackbar(true);
                 setMaskingText('');
+                assignToGroupsDispatch([]);
             }).catch(error => {
                 alert('Error while assigning OJT');
                 console.log(error);
