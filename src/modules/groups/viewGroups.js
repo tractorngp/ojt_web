@@ -2,7 +2,7 @@ import React from 'react';
 import { TableContainer, makeStyles, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { IoMdSettings } from 'react-icons/io';
+import { IoMdSettings, IoMdAdd } from 'react-icons/io';
 import { Modal, Badge, Button, Table, DropdownButton, Dropdown, NavDropdown, Container, OverlayTrigger, Popover, Form } from 'react-bootstrap';
 import CreateGroup from './createGroup';
 import { GroupContext } from './groups';
@@ -111,7 +111,7 @@ const ViewGroups = props => {
       selectedIds: null
     };
     if (nullChecker(edit_group_id) &&
-      nullChecker(edit_name) && listEmptyChecker(edit_group_members)) {
+      nullChecker(edit_name)) {
       setMaskingText('Fetching Group Info...');
       setBackdrpFlag(true);
       getUsersByRefs(edit_group_members).then(usersList => {
@@ -220,7 +220,8 @@ const ViewGroups = props => {
         </Modal>
 
         {/* Filtering Options */}
-        <div style={{ marginBottom: '1.0vh', marginRight: '10.0vh', marginTop: '1.0vh', display: 'flex', flexDirection: 'row-reverse' }} >
+        <div style={{ marginBottom: '0.7rem', marginTop: '0.7rem', display: 'flex', flexDirection: 'row-reverse' }} >
+          <Button variant="danger" style={{marginLeft: '1rem'}}> <IoMdAdd size={20} /> </Button>
           <OverlayTrigger
             trigger="click"
             key={'bottom'}
@@ -241,7 +242,7 @@ const ViewGroups = props => {
                    variant='success' onClick={filterGroupsWithFields}>
                     Submit
                   </Button>
-                  &nbsp;
+                  &nbsp;&nbsp;
                   <Button variant='light' onClick={clearFilters}>
                     Clear
                   </Button>
@@ -251,7 +252,7 @@ const ViewGroups = props => {
             }
           >
             <Button variant="secondary">Filters</Button>
-          </OverlayTrigger>{' '}
+          </OverlayTrigger>
         </div>
 
         {/*  Groups Display  */}

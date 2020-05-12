@@ -118,7 +118,7 @@ export const PendingOJTs = props => {
     if(assigned_ojts_full != null && assigned_ojts_full.length > 0){
       if(ojtName != null && ojtName.trim() != ""){
         tempList1 = await assigned_ojts_full.filter(rec => {
-          if(rec['ojt_name'].includes(ojtName)){
+          if(rec['ojt_name'].toLowerCase().includes(ojtName.toLowerCase())){
             return rec;
           }
         });
@@ -129,7 +129,7 @@ export const PendingOJTs = props => {
 
       if(assignedTo != null && assignedTo.trim() != ""){
         tempList2 = await tempList1.filter(rec => {
-          if(rec['assigned_to_name'].includes(assignedTo)){
+          if(rec['assigned_to_name'].toLowerCase().includes(assignedTo.toLowerCase())){
             return rec;
           }
         })
@@ -144,7 +144,7 @@ export const PendingOJTs = props => {
           let d2 = new Date(dueDate);
           d1.setHours(0,0,0,0);
           d2.setHours(0,0,0,0);
-          if(moment(d1).diff(d2, 'days') >= 0){
+          if(moment(d2).diff(d1, 'days') >= 0){
             return rec;
           }
         })
@@ -278,7 +278,7 @@ export const PendingOJTs = props => {
             }
           >
             <Button variant="secondary">Filters</Button>
-          </OverlayTrigger>{' '}
+          </OverlayTrigger>
         </div>
         
 

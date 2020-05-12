@@ -6,7 +6,7 @@ import ViewOjt from './viewOjt';
 const MainOjtPage = props => {
 
     return (
-        <Container fluid>
+        <Container style={{height:'100%'}} fluid>
             <Row>
                 <Col md={8}>
                     <CreateOjt />

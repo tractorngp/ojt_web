@@ -11,6 +11,7 @@ const OJT_TEMPLATES = 'ojt_templates';
 const useStyles = makeStyles(theme => ({
     viewOjtContainer: {
         maxHeight: '80vh',
+        height:'100%',
         overflowY: 'auto',
         overflowX: 'hidden'
     },
@@ -117,8 +118,8 @@ const ViewOjt = props => {
         </Modal>
             {
                 ojtTemplates.length > 0 ?
-                <ListGroup>
-                    <ListGroup.Item active> ALL OJTs </ListGroup.Item>
+                <ListGroup className={classes.viewOjtContainer}>
+                    <ListGroup.Item active> ALL OJT Templates </ListGroup.Item>
                 {
                     ojtTemplates.map(templateItem => (
                         <ListGroup.Item key={templateItem.ojt_name}>
