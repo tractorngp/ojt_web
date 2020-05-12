@@ -120,28 +120,6 @@ const ViewOjt = props => {
                 <div style={{ display:'flex', flexDirection: 'row-reverse', width:'100%', marginTop:'1.0vh', marginBottom: '1.0vh' }}><Button variant="danger" style={{width:'10%'}}><IoMdAdd size={25} /></Button></div>
                { 
                 ojtTemplates.length > 0 ?
-<<<<<<< HEAD
-                <ListGroup className={classes.viewOjtContainer}>
-                    <ListGroup.Item active> ALL OJT Templates </ListGroup.Item>
-                {
-                    ojtTemplates.map(templateItem => (
-                        <ListGroup.Item key={templateItem.ojt_name}>
-                            <Row>
-                                <Col md={6} xs={6} xl={6} lg={6}>
-                                <p> {templateItem.ojt_name} &nbsp; <br />
-                                <Badge variant={'info'}> {'Media: '+templateItem.images.length}
-                                </Badge> &nbsp;
-                                <Badge variant={'info'}> {'Questions: '+templateItem.questions.length}
-                                </Badge>
-                                 </p> 
-                                </Col>
-                                <Col md={6} xs={6} xl={6} lg={6}>
-                                    <Tooltip title="OJT Info">
-                                        <Button variant={'light'}>
-                                            <IoMdInformationCircleOutline />
-                                        </Button>
-                                    </Tooltip>
-=======
                 <ListGroup>
                         <ListGroup.Item style={{fontSize:'1.2rem', fontWeight: '700', color: '#d9534f', background:'#eeeeee'}}> ALL OJTs </ListGroup.Item>
                         {
@@ -162,7 +140,6 @@ const ViewOjt = props => {
                                                     <IoMdInformationCircleOutline />
                                                 </Button>
                                             </Tooltip>
->>>>>>> d1c5a445f2e1f38fe2cdfb6e1086ccc32273d3e5
                                     &nbsp;
                                     <Button
                                                 onClick={() => handleOpen(templateItem.record_id)}
