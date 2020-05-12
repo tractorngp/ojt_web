@@ -126,6 +126,7 @@ export const Groups = props => {
                     <div className={classes.snackbarStyle} > Group Created Successfully! </div>
                 </Snackbar>
                 <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
+                {/* create group modal - actual logic to verify and filter in CreateGroup */}
                 <Modal size={'lg'} className={styles.info_modal} show={open} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Create Group</Modal.Title>

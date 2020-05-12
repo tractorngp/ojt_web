@@ -169,6 +169,7 @@ export const PendingOJTs = props => {
     setOjtName("");
     setAssignedTo("");
     setDueDate(new Date());
+    setTotalCount(assigned_ojts_full.length);
     let tempList = assigned_ojts_full.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
     setOJTs(tempList);
   }
