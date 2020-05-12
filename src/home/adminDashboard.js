@@ -47,9 +47,9 @@ const bodyDivs = {
 
 const drawerSegments = [
   { name: 'Users', id: bodyDivs.USERS },
-  { name: 'Create OJT', id: bodyDivs.CREATE_OJT },
+  { name: 'OJTs', id: bodyDivs.CREATE_OJT },
   { name: 'Groups', id: bodyDivs.GROUPS },
-  { name: 'Pending OJTs', id: bodyDivs.PENDING_OJTS }
+  // { name: 'Pending OJTs', id: bodyDivs.PENDING_OJTS }
 ]
 
 export default function AdminDashboard(props) {
