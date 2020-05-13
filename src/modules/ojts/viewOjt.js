@@ -6,6 +6,7 @@ import { CircularProgress, Tooltip, makeStyles, Snackbar } from '@material-ui/co
 import { IoMdInformationCircleOutline, IoMdPeople, IoMdAdd } from 'react-icons/io';
 import AssignOJT from './assignOjt';
 import { BackDropComponent, PageLoaderComponent } from '../../components/pageLoaderComponent';
+import CreateOJTNew from './createOjtNew';
 
 const OJT_TEMPLATES = 'ojt_templates';
 const useStyles = makeStyles(theme => ({
@@ -19,6 +20,12 @@ const useStyles = makeStyles(theme => ({
         padding: '20px',
         color: 'white',
         background: '#4caf50'
+    },
+    ojtModalClass: {
+        maxHeight: '100vh',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        minHeight: '100vh'
     }
 }));
 
@@ -34,6 +41,7 @@ const ViewOjt = props => {
     const [openSnackbar, setSnackbar] = React.useState(false);
     const [snackBarText, setsbarText] = React.useState('');
     const [ loading, setLoading ] = React.useState(true);
+    const [ ojtOpen, setOjtOpen ] = React.useState(false);
 
     const fetchOjts = _ => {
         setLoading(true);
@@ -53,6 +61,10 @@ const ViewOjt = props => {
         setSelectedOJT(null);
         assignToGroupsDispatch([]);
     };
+
+    const handleOJTClose = _ => {
+        setOjtOpen(false);
+    }
 
     const handleOpen = ojt_id => {
         setSelectedOJT(ojt_id);
@@ -122,8 +134,14 @@ const ViewOjt = props => {
                         Submit</Button>
                 </Modal.Footer>
             </Modal>
+
+            {/* Create OJT Modal */}
+            <CreateOJTNew ojtOpen={ojtOpen} ojtDispatch={setOjtOpen} editMode={true} fromCreate={true}  />
             
-                <div style={{ display:'flex', flexDirection: 'row-reverse', width:'100%', marginTop:'1.0vh', marginBottom: '1.0vh' }}><Button variant="danger" style={{width:'10%'}}><IoMdAdd size={25} /></Button></div>
+                <div style={{ display:'flex', flexDirection: 'row-reverse', width:'100%', marginTop:'1.0vh', marginBottom: '1.0vh' }}>
+                    <Button variant="danger" style={{width:'10%'}} onClick={()=> {
+                        setOjtOpen(true)
+                    }}><IoMdAdd size={25} /></Button></div>
                 {
                     loading === true ?
                     <span> <CircularProgress size={15} /> <p> Fetching OJT Templates... </p></span>
@@ -147,7 +165,8 @@ const ViewOjt = props => {
                                         </Col>
                                         <Col md={6} xs={6} xl={6} lg={6}>
                                             <Tooltip title="OJT Info">
-                                                <Button variant={'light'}>
+                                                <Button variant={'light'} 
+                                                >
                                                     <IoMdInformationCircleOutline />
                                                 </Button>
                                             </Tooltip>

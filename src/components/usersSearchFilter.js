@@ -91,6 +91,7 @@ const UsersSearchFilter = ({ users, roles, selectedIds }) => {
                                 : true);
                     }).map(user => (
                         <li key={user.user.tokenId} style={{ textAlign: 'left' }}> <p> <Checkbox
+                            color={'primary'}
                             onChange={(val) => editSelectedList(val, user.user.tokenId)}
                             defaultChecked={user.selected} /> {user.user.tokenId} - {user.user.name}  </p>  </li>
                     ))
@@ -114,6 +115,7 @@ const UsersSearchFilter = ({ users, roles, selectedIds }) => {
                                 : true);
                     }).map(user => (
                         <li key={user.user.tokenId} style={{ textAlign: 'left' }}><p> <Checkbox
+                            color={'primary'}
                             onChange={(val) => editSelectedList(val, user.user.tokenId)}
                             defaultChecked={user.selected} />  {user.user.tokenId} - {user.user.name}  </p>  </li>
                     ))

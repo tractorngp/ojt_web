@@ -1,5 +1,4 @@
 import React from 'react';
-import CreateOjt from './createOjt';
 import ViewOjt from './viewOjt';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -296,6 +295,7 @@ const MainOjtPage = props => {
                                                             <th>Assigned To</th>
                                                             <th>Group</th>
                                                             <th>Status</th>
+                                                            <th>Activity</th>
                                                             <th>Assigned Date</th>
                                                             <th>Due Date</th>
                                                             <th>No Of Questions</th>
@@ -314,8 +314,10 @@ const MainOjtPage = props => {
                                                                     <td>{row.group_name != null ? row.group_name : ""}</td>
                                                                     <td>
                                                                         <Badge variant={row.active === true ? 'info' : 'warning'}>
-                                                                            {row.active === true ? 'Active' : 'Inactive'}</Badge> &nbsp;
-                                                                                {row.status == "completed" ?
+                                                                            {row.active === true ? 'Active' : 'Inactive'}</Badge>
+                                                                    </td>
+                                                                    <td>
+                                                                        {row.status == "completed" ?
                                                                             <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'success'}>
                                                                                 {'Completed'}
                                                                             </Badge>
@@ -323,7 +325,7 @@ const MainOjtPage = props => {
                                                                                 <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'danger'}>
                                                                                     {new Date().getTime() < new Date(row.due_date).getTime() ? 'Pending' : 'Past Due Date'}
                                                                                 </Badge>
-                                                                                : null}
+                                                                                : 'N/A'}
                                                                     </td>
                                                                     <td>
                                                                         {row.assigned_date ? new Date(row.assigned_date).toLocaleDateString() : null}

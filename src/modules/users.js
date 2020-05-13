@@ -555,7 +555,7 @@ const Users = props => {
               </Popover>
             }
           >
-            <Button variant="secondary">Filters</Button>
+            <Button style={{marginRight:'0.5rem'}} variant="secondary">Filters</Button>
           </OverlayTrigger> &nbsp;
         </Col>
       </Row>

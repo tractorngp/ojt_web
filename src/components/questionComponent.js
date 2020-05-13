@@ -1,7 +1,8 @@
 import React from 'react';
 import { Container, FormControl, Row, Col, Button, ListGroup, Card } from 'react-bootstrap';
 import { Checkbox } from '@material-ui/core';
-import { nullChecker, stringIsNotEmpty } from '../utils/commonUtils';
+import { nullChecker, stringIsNotEmpty, stringIsEmpty } from '../utils/commonUtils';
+import { IoMdTrash } from 'react-icons/io';
 
 /*
 question : {
@@ -16,9 +17,9 @@ answers: [...
 ...]
 */
 
-const AnswerComponent = ({ index, answers, AnswerDispatch, question, questionDispatch }) => {
+const AnswerComponent = ({ index, question, questionDispatch, allAnswerDispatch, inComingAnswer }) => {
 
-    const [answer, setAnswer] = React.useState(null);
+    const [answer, setAnswer] = React.useState("");
     const [correctChoice, setCorrectChoice] = React.useState(false);
 
     const updateAnswers = (choice,answer) => {
@@ -26,20 +27,18 @@ const AnswerComponent = ({ index, answers, AnswerDispatch, question, questionDis
             correct: choice,
             option: answer
         };
-        if(answers.length === 0){
+        if(question.answers.length === 0){
             let answerTexts = [];
             answerTexts.push(changed);
-            AnswerDispatch(answerTexts);
             question.answers = answerTexts;
             questionDispatch(question);
         }else{
-            let answerTexts = answers;
+            let answerTexts = question.answers;
             if(nullChecker(answerTexts[index])){
                 answerTexts[index] = changed;
             }else{
                 answerTexts.push(changed);
             }
-            AnswerDispatch(answerTexts);
             question.answers = answerTexts;
             questionDispatch(question);
         }
@@ -62,23 +61,58 @@ const AnswerComponent = ({ index, answers, AnswerDispatch, question, questionDis
         }
     }
 
+    const deleteAnswerAndDispatch = ansToDelete => {
+        console.log(ansToDelete);
+        const oldAnswers = question.answers;
+        if(oldAnswers.length === 1){
+        question.answers = [];
+        questionDispatch(question);
+        allAnswerDispatch([]);
+        }else{
+            let newAnswers = [];
+            oldAnswers.forEach(oa => {
+                if(oa.option === ansToDelete){
+                }else{
+                    newAnswers.push(oa);
+                }
+            });
+            question.answers = newAnswers;
+            questionDispatch(question);
+            allAnswerDispatch(newAnswers);
+            setAnswer(""); setCorrectChoice(false);
+        }
+    }
+
+    React.useEffect( _ => {
+        if(nullChecker(inComingAnswer)){
+            setAnswer(inComingAnswer.option);
+            setCorrectChoice(inComingAnswer.correct);
+        }else{
+            setAnswer("");
+            setCorrectChoice(false);
+        }
+    }, []);
+
     return (
         <Row>
             <Col md={2}>
-                <Checkbox checked={correctChoice}
+                <Checkbox defaultChecked={inComingAnswer !== null ? inComingAnswer.correct : false}
                     onChange={(val) => handleChoiceChange(val.target.checked)}
                 />
             </Col>
-            <Col md={10}>
-                <FormControl type={'text'} placeholder={'Answer..'}
+            <Col md={8}>
+                <FormControl type={'text'} placeholder={'Answer..'} defaultValue={answer}
                     onChange={(val) => handleAnswerChange(val.target.value)}
                 />
+            </Col>
+            <Col md={2}>
+                <Button disabled={stringIsEmpty(answer) && answer.trim().length === 0} variant={'danger'} onClick={()=>deleteAnswerAndDispatch(answer)}> <IoMdTrash /> </Button>
             </Col>
         </Row>
     );
 };
 
-const QuestionComponent = ({ index, question, questionDispatch }) => {
+const QuestionComponent = ({ index, question, questionDispatch, editingQuestion }) => {
 
     const [allAnswers, setAnswers] = React.useState([]);
     const [ answerTexts, setAnwerTexts ] = React.useState([]);
@@ -96,13 +130,24 @@ const QuestionComponent = ({ index, question, questionDispatch }) => {
     }
 
     React.useEffect( _ => {
-        question.index = index;
-        questionDispatch(question);
+        console.log(question);
+        if(editingQuestion === false) {
+            const questionInitial = {
+                question: null,
+                answers: [],
+                index: index
+            }
+            questionDispatch(questionInitial);
+        }else{
+            question.index = index;
+            questionDispatch(question);
+            setAnswers(question.answers);
+        }
     }, []);
 
     return (
         <Container fluid>
-            <FormControl placeholder={'Enter Question'}
+            <FormControl placeholder={'Enter Question'} value={question.question}
                 onChange={(val) => setQuestionText(val.target.value)}
             />
             <Button
@@ -113,11 +158,12 @@ const QuestionComponent = ({ index, question, questionDispatch }) => {
                 allAnswers.length > 0 ?
 
                     <ListGroup>
-                        {allAnswers.map((answer,index) => (
-                            <ListGroup.Item key={index}>
-                                <AnswerComponent index={index} question={question} 
-                                answers={answer.answers} questionDispatch={questionDispatch}
-                                AnswerDispatch={answer.answerDispatch} />
+                        {allAnswers.map((answer,aindex) => (
+                            <ListGroup.Item key={aindex}>
+                                <AnswerComponent index={aindex} question={question}
+                                questionDispatch={questionDispatch}
+                                inComingAnswer={nullChecker(question.answers[aindex]) ? question.answers[aindex] : null}
+                                allAnswerDispatch={setAnswers} />
                             </ListGroup.Item>
                         ))}
                     </ListGroup> : 'Add Answers'
