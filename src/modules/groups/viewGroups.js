@@ -3,7 +3,7 @@ import { TableContainer, makeStyles, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { IoMdSettings, IoMdAdd } from 'react-icons/io';
-import { Modal, Badge, Button, Table, DropdownButton, Dropdown, NavDropdown, Container, OverlayTrigger, Popover, Form } from 'react-bootstrap';
+import { Modal, Badge, Button, Table, DropdownButton, Dropdown, NavDropdown, Container, OverlayTrigger, Popover, Form, Alert } from 'react-bootstrap';
 import CreateGroup from './createGroup';
 import { GroupContext } from './groups';
 import { nullChecker, listEmptyChecker, stringIsNotEmpty } from './../../utils/commonUtils';
@@ -186,6 +186,7 @@ const ViewGroups = props => {
   }
 
   React.useEffect(_ => {
+    initialPageState.currentPage = 0;
     fetchAllGroups();
   }, []);
 
@@ -195,7 +196,9 @@ const ViewGroups = props => {
       <TableContainer component={'span'}>
         {/* snack bar for info */}
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
-          <div className={classes.snackbarStyle} > Group Updated Successfully! </div>
+        <Alert variant={'success'} onClose={() => setSnackbar(false)} dismissible>
+          Group Updated Succesfully!
+        </Alert>
         </Snackbar>
         {/*  Edit group modal  */}
         <Modal size={'xl'} show={open} onHide={handleClose} animation={false}>

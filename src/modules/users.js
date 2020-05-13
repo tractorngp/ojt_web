@@ -5,62 +5,14 @@ import 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import { IoMdPersonAdd, IoMdSettings, IoMdSearch, IoMdTrash } from 'react-icons/io';
 import { useForm } from 'react-hook-form';
-import { Row, Col, Form, Button, Modal, FormControl, Container, Table, DropdownButton, Dropdown } from 'react-bootstrap';
+import { Row, Col, Form, Button, Modal, FormControl, Container, Table, DropdownButton, Dropdown, Alert, Popover, OverlayTrigger } from 'react-bootstrap';
 import { PageLoaderComponent, BackDropComponent } from '../components/pageLoaderComponent';
 import { MdMoreVert } from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
-import { nullChecker } from '../utils/commonUtils';
+import { nullChecker, listEmptyChecker, stringIsEmpty, stringIsNotEmpty } from '../utils/commonUtils';
+import { initialPageState, createData, verifyUserAlreadyExists, userStyles } from '../utils/userUtils';
 
-const initialPageState = {
-  name: null,
-  active: false,
-  nor: 10,
-  page: 0,
-  currentPage: 0
-};
-
-
-const useStyles = makeStyles((theme) => ({
-  table: {
-    minWidth: 650,
-  },
-  tableCell: {
-    border: '0.5px solid #d0d0d0'
-  },
-  snackbarStyle: {
-    padding: '20px',
-    color: 'white',
-    background: '#4caf50'
-  },
-  modalBody: {
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    fontSize: 14,
-  },
-  pos: {
-    marginBottom: 12,
-  },
-  inputField: {
-    padding: '5px',
-    margin: '5px',
-    width: '80%'
-  },
-  errorMessage: {
-    color: 'red'
-  },
-  lastTableData: {
-    width: '3% !important',
-  }
-}));
-
-function createData(name, tokenid, email, role, status) {
-  return { name, tokenid, email, role, status };
-}
+const ROLES = ['USER', 'ADMIN'];
 
 const Users = props => {
   const db = firebase.firestore();
@@ -77,21 +29,18 @@ const Users = props => {
   const [totalUsersCount, setUsersCount] = React.useState(0);
   const [editingUser, setEditingUser] = React.useState(null);
   const [snackBarText, setSnackbarText] = React.useState('');
-  const [ showDeletePrompt, setDeletePrompt ] = React.useState(false);
-  const [ userToDelete, setUserToDelete ] = React.useState(null);
+  const [showDeletePrompt, setDeletePrompt] = React.useState(false);
+  const [userToDelete, setUserToDelete] = React.useState(null);
   const { handleSubmit, register, errors } = useForm();
+
+  // for filtering
+  const [filterUserName, setfUName] = React.useState("");
+  const [filterUserEmail, setfUEmail] = React.useState("");
+  const [filterUserToken, setfUToken] = React.useState("");
+  const [filterRole, setRoleFilter] = React.useState("");
+
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
   const tokenIdRegex = /^[0-9]*$/;
-
-  const verifyUserAlreadyExists = async tokenId => {
-    const doc = await db.collection('users').doc(String(tokenId))
-      .get();
-    const data = await doc.data();
-    if (data !== undefined) {
-      return true;
-    }
-    return false;
-  }
 
   const getAllUsers = async _ => {
     setLoading(true);
@@ -182,7 +131,53 @@ const Users = props => {
     }; reader.readAsBinaryString(file);
   }
 
+  const applyFilters = _ => {
+    if (listEmptyChecker(userRows)) {
+      let flevel1 = [], flevel2 = [], flevel3 = [], flevel4 = [];
+      if (!stringIsEmpty(filterUserToken)) {
+        flevel1 = userRows.filter(x => {
+          if(x.tokenid.includes(filterUserToken)){
+            return true;
+          }
+        });
+      }else{
+        flevel1 = userRows;
+      }
+      if (stringIsNotEmpty(filterUserName)) {
+        flevel2 = flevel1.filter(x => x.name.toLowerCase().includes(filterUserName.toLowerCase()));
+      }else{
+        flevel2 = flevel1;
+      }
+      if (stringIsNotEmpty(filterUserEmail)) {
+        flevel3 = flevel2.filter(x => x.email.toLowerCase().includes(filterUserEmail.toLowerCase()));
+      }else{
+        flevel3 = flevel2;
+      }
+      if (stringIsNotEmpty(filterRole) && filterRole !== 'none') {
+        flevel4 = flevel3.filter(x => x.role.toLowerCase().includes(filterRole.toLowerCase()));
+      }else{
+        flevel4 = flevel3;
+      }
+      setUsersCount(flevel4.length);
+      flevel4 = flevel4.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+      setVisibleUserRows(flevel4);
+    } else {
+      console.log('no records to filter');
+    }
+  };
+
+  // for filtering
+  const clearFilter = _ => {
+    setfUEmail("");
+    setfUName("");
+    setfUToken(""); setRoleFilter("");
+    setUsersCount(userRows.length);
+    let tempList = userRows.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+    setVisibleUserRows(tempList);
+  }
+
   React.useEffect(_ => {
+    initialPageState.currentPage = 0;
     getAllUsers();
   }, []);
 
@@ -296,18 +291,18 @@ const Users = props => {
     setMaskingText('Deleting User...');
     setBackdrpFlag(true);
     db.collection('users').doc(userTokenId).delete()
-    .then( _ => {
-      setBackdrpFlag(false); setMaskingText('');
-      setDeletePrompt(false); setUserToDelete(null);
-      alert('User Deleted Successfully');
-    }).catch(error => {
-      console.log(error);
-      setBackdrpFlag(false); setMaskingText('');
-      alert('Error Deleting User');
-    })
+      .then(_ => {
+        setBackdrpFlag(false); setMaskingText('');
+        setDeletePrompt(false); setUserToDelete(null);
+        alert('User Deleted Successfully');
+      }).catch(error => {
+        console.log(error);
+        setBackdrpFlag(false); setMaskingText('');
+        alert('Error Deleting User');
+      })
   }
 
-  const classes = useStyles();
+  const classes = userStyles();
 
   const createUserBody = (
     <div>
@@ -386,7 +381,7 @@ const Users = props => {
           <CardContent>
             <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
               <FormControl
-                name="username" defaultValue={nullChecker(editingUser) ? editingUser.name : ''} placeholder={'User Name'}
+                name="username" defaultValue={nullChecker(userInfo) ? userInfo.name : ''} placeholder={'User Name'}
                 ref={register({
                   required: 'Required',
                   validate: value => value !== '' || 'Field Required'
@@ -397,7 +392,7 @@ const Users = props => {
             <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
               <FormControl
                 name='tokenId' placeholder={'Token ID'}
-                defaultValue={nullChecker(editingUser) ? editingUser.tokenid : ''}
+                defaultValue={nullChecker(userInfo) ? userInfo.tokenid : ''}
                 ref={register({
                   required: 'Required',
                   pattern: {
@@ -410,7 +405,7 @@ const Users = props => {
             </Typography>
             <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
               <Form.Control as={'select'} placeholder={'Select a Role'} name="role"
-                defaultValue={nullChecker(editingUser) ? editingUser.role : ''}
+                defaultValue={nullChecker(userInfo) ? userInfo.role : ''}
                 ref={register({
                   required: 'Required',
                   validate: value => value !== null && value !== 'none' || 'Please choose a role'
@@ -424,7 +419,7 @@ const Users = props => {
             </Typography>
             <Typography component="span" className={classes.title} color="textSecondary" gutterBottom>
               <FormControl name={'email'}
-                defaultValue={nullChecker(editingUser) ? editingUser.email : ''}
+                defaultValue={nullChecker(userInfo) ? userInfo.email : ''}
                 ref={register({
                   required: 'Required',
                   pattern: {
@@ -445,24 +440,26 @@ const Users = props => {
   return (
     <Container fluid style={{ maxWidth: '100%' }}>
       <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
-        <div className={classes.snackbarStyle} > {snackBarText} </div>
+        <Alert variant={'success'} onClose={() => setSnackbar(false)} dismissible>
+          {snackBarText}
+        </Alert>
       </Snackbar>
 
       {/* Delete User Prompt */}
 
       <Modal size={'lg'} show={showDeletePrompt} onHide={closeDeletePrompt}>
-      <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
-      <Modal.Header closeButton>
+        <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
+        <Modal.Header closeButton>
           <Modal.Title>Are you sure you want to Delete User - {userToDelete}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <p>This would delete the user, their assigned OJTs and involved groups.</p>
+          <p>This would delete the user, their assigned OJTs and involved groups.</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant={'light'} onClick={closeDeletePrompt}>
             Cancel
             </Button> &nbsp;
-            <Button variant={'danger'} onClick={()=>deleteUser(userToDelete)}
+            <Button variant={'danger'} onClick={() => deleteUser(userToDelete)}
           >Submit</Button>
         </Modal.Footer>
       </Modal>
@@ -503,7 +500,7 @@ const Users = props => {
 
 
 
-      <Row style={{marginBottom: '10px'}}>
+      <Row style={{ marginBottom: '10px' }}>
         <Col md={4}>
         </Col>
         <Col md={4}>
@@ -512,9 +509,54 @@ const Users = props => {
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
         </Col>
-        <Col md={4} style={{ display:'flex',flexDirection:'row-reverse',width:'100%' }}>
-      <Button onClick={() => setUserModal(true)} variant={'outline-danger'} > <IoMdPersonAdd /> &nbsp; Create User </Button>
-      <Button style={{marginRight:'1rem'}} variant={'secondary'}>Filters </Button> &nbsp;
+        <Col md={4} style={{ display: 'flex', flexDirection: 'row-reverse', width: '100%' }}>
+          <Button onClick={() => setUserModal(true)} variant={'outline-danger'} > <IoMdPersonAdd /> &nbsp; Create User </Button>
+          <OverlayTrigger
+            trigger="click"
+            key={'bottom'}
+            rootClose
+            placement={'bottom'}
+            overlay={
+              <Popover id={`popover-positioned-${'bottom'}`}>
+                <Popover.Title as="h3">{'Filter By:'}</Popover.Title>
+                <Popover.Content>
+                  <Form>
+                    <Form.Group controlId="formBasicEMpId">
+                      <Form.Label>Employee ID</Form.Label>
+                      <Form.Control type="text" value={filterUserToken} placeholder="Enter Employee ID" onChange={(val) => setfUToken(val.target.value)} />
+                    </Form.Group>
+                    <Form.Group controlId="formBasicEmpName">
+                      <Form.Label>User Name</Form.Label>
+                      <Form.Control type="text" value={filterUserName} placeholder="Enter Name" onChange={(val) => setfUName(val.target.value)} />
+                    </Form.Group>
+                    <Form.Group controlId="formBasicEMpEMail">
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control type="text" value={filterUserEmail} placeholder="Enter Email" onChange={(val) => setfUEmail(val.target.value)} />
+                    </Form.Group>
+                    <Form.Group controlId="formBasicRole">
+                      <Form.Label>Role</Form.Label>
+                      <Form.Control as="select" value={filterRole} placeholder="Select Role" onChange={(val) => setRoleFilter(val.target.value)} >
+                      <option value={'none'}> -- Select a Role -- </option>
+                      <option value='USER' > User </option>
+                        <option value='ADMIN' >Admin</option>
+                      </Form.Control>
+                    </Form.Group>
+                    <Button variant='success'
+                      disabled={stringIsEmpty(filterUserName) && stringIsEmpty(filterUserEmail)
+                        && stringIsEmpty(filterRole) && stringIsEmpty(filterUserToken)}
+                      onClick={applyFilters}>
+                      Submit
+                      </Button> &nbsp;
+                    <Button variant='light' onClick={clearFilter}>
+                      Clear
+                    </Button>
+                  </Form>
+                </Popover.Content>
+              </Popover>
+            }
+          >
+            <Button variant="secondary">Filters</Button>
+          </OverlayTrigger> &nbsp;
         </Col>
       </Row>
       {
@@ -578,10 +620,10 @@ const Users = props => {
                                   > Edit User
                                   </Dropdown.Item>
                                   <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
-                                  onClick={()=> {
-                                    setUserToDelete(row.tokenid);
-                                    setDeletePrompt(true);
-                                  }}
+                                    onClick={() => {
+                                      setUserToDelete(row.tokenid);
+                                      setDeletePrompt(true);
+                                    }}
                                   > <IoMdTrash /> Delete User
                                   </Dropdown.Item>
                                 </DropdownButton>

@@ -3,7 +3,7 @@ import { UserContext } from '../../App';
 import { makeStyles, Snackbar } from '@material-ui/core';
 import ViewGroups from './viewGroups';
 import CreateGroup from './createGroup';
-import { Modal, Button, Container } from "react-bootstrap";
+import { Modal, Button, Container, Alert } from "react-bootstrap";
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { nullChecker, listEmptyChecker } from './../../utils/commonUtils';
@@ -123,7 +123,9 @@ export const Groups = props => {
         <GroupContext.Provider value={{ groupState, groupDispatch, selectedTokenState, selectedTokenDispatch }} >
             <div>
                 <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
-                    <div className={classes.snackbarStyle} > Group Created Successfully! </div>
+                <Alert variant={'success'} onClose={() => setSnackbar(false)} dismissible>
+                    Group Created Succesfully!
+                </Alert>
                 </Snackbar>
                 <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
                 {/* create group modal - actual logic to verify and filter in CreateGroup */}

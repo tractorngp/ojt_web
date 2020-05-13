@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, FormControl, Row, Col, Card, Button, ListGroup, Modal, Jumbotron, InputGroup } from 'react-bootstrap';
+import { Container, FormControl, Row, Col, Card, Button, ListGroup, Modal, Jumbotron, InputGroup, Alert } from 'react-bootstrap';
 import QuestionDisplay from '../../utils/questionDisplayComponent';
 import { makeStyles } from '@material-ui/core/styles';
 import { IoMdAddCircle, IoMdCloudUpload, IoMdTrash, IoMdCreate, IoMdRemoveCircleOutline } from 'react-icons/io';
@@ -193,9 +193,11 @@ const CreateOjt = props => {
     };
 
     return (
-        <Container style={{maxHeight:'80vh',overflowY:'auto',overflowX:'hidden'}}>
+        <Container style={{ maxHeight: '80vh', overflowY: 'auto', overflowX: 'hidden' }}>
             <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
-                <div className={classes.snackbarStyle} > OJT created Successfully! </div>
+                <Alert variant={'success'} onClose={() => setSnackbar(false)} dismissible>
+                    OJT Created Successfully!
+                </Alert>
             </Snackbar>
             <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
             <Modal show={open} onHide={handleClose} animation={true}>
@@ -209,8 +211,8 @@ const CreateOjt = props => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
-                    variant={'light'}
-                    onClick={handleClose}>
+                        variant={'light'}
+                        onClick={handleClose}>
                         Cancel
                         </Button> &nbsp;
                         <Button
@@ -233,7 +235,7 @@ const CreateOjt = props => {
                     > Clear All </Button> &nbsp;
             <Button
                         disabled={questionnaire.length === 0 || stringIsEmpty(ojtName)
-                        || dueDate.getTime() < timeWhenLoaded}
+                            || dueDate.getTime() < timeWhenLoaded}
                         onClick={validateAndCreateOjt}
                         variant={'success'}> Submit OJT </Button>
                 </Col>
@@ -250,15 +252,15 @@ const CreateOjt = props => {
                     </Col>
                     <Col md={4}>
                         <InputGroup>
-                        <InputGroup.Prepend>
-                        <InputGroup.Text> Due Date </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl
-                            value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
-                            type={'date'}
-                            placeholder={'Due Date'}
-                            onChange={(val) => { setDueDate(val.target.valueAsDate) }}
-                        />
+                            <InputGroup.Prepend>
+                                <InputGroup.Text> Due Date </InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
+                                type={'date'}
+                                placeholder={'Due Date'}
+                                onChange={(val) => { setDueDate(val.target.valueAsDate) }}
+                            />
                         </InputGroup>
                     </Col>
                     <Col md={4}>

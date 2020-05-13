@@ -6,7 +6,7 @@ import 'firebase/firestore';
 import { UserContext } from '../../App';
 import { nullChecker, listEmptyChecker, stringIsNotEmpty, stringIsEmpty } from '../../utils/commonUtils';
 import { Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip, FormControlLabel } from '@material-ui/core';
-import { ListGroup, Row, Col, FormGroup, Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup } from 'react-bootstrap';
+import { ListGroup, Row, Col, FormGroup, Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup, Alert } from 'react-bootstrap';
 import Spinner from 'react-spinkit';
 import ReactPaginate from 'react-paginate';
 import '../../assets/styles/bootstrap.min.css';
@@ -214,66 +214,68 @@ const MainOjtPage = props => {
                     <Col md={8}>
                         <div>
                             <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setSnackbar(false)}>
-                                <div className={classes.snackbarStyle} > OJT updated successfully! </div>
+                                <Alert variant={'success'} onClose={() => setSnackbar(false)} dismissible>
+                                    OJT Updated Successfully!
+                                </Alert>
                             </Snackbar>
                             <BackDropComponent maskingText={maskingText} showBackdrop={backdropFlag} />
 
                             <div style={{ marginBottom: '1.0vh', marginRight: '0.0vh', marginTop: '1.0vh' }} >
                                 <Row>
-                                    <Col md={4} style={{display:'flex', flexDirection:'column', justifyContent:'center', textAlign:'left', fontSize:'1.2rem'}}>
-                                        <b style={{color: '#d9534f'}}>Assigned OJTs</b>
+                                    <Col md={4} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'left', fontSize: '1.2rem' }}>
+                                        <b style={{ color: '#d9534f' }}>Assigned OJTs</b>
                                     </Col>
                                     <Col md={6}></Col>
-                                    <Col md={2} style={{display:'flex', flexDirection:'column', justifyContent:'center'}}>
+                                    <Col md={2} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                         <OverlayTrigger
-                                        trigger="click"
-                                        key={'bottom'}
-                                        rootClose
-                                        placement={'bottom'}
-                                        overlay={
-                                            <Popover id={`popover-positioned-${'bottom'}`}>
-                                                <Popover.Title as="h3">{'Filter By:'}</Popover.Title>
-                                                <Popover.Content>
-                                                    <Form>
-                                                        <Form.Group controlId="formBasicOJTName">
-                                                            <Form.Label>OJT Name</Form.Label>
-                                                            <Form.Control type="text" value={ojtName} placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)} />
-                                                        </Form.Group>
+                                            trigger="click"
+                                            key={'bottom'}
+                                            rootClose
+                                            placement={'bottom'}
+                                            overlay={
+                                                <Popover id={`popover-positioned-${'bottom'}`}>
+                                                    <Popover.Title as="h3">{'Filter By:'}</Popover.Title>
+                                                    <Popover.Content>
+                                                        <Form>
+                                                            <Form.Group controlId="formBasicOJTName">
+                                                                <Form.Label>OJT Name</Form.Label>
+                                                                <Form.Control type="text" value={ojtName} placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)} />
+                                                            </Form.Group>
 
-                                                        <Form.Group controlId="formBasicAssignedTo">
-                                                            <Form.Label>Assigned To</Form.Label>
-                                                            <Form.Control type="text" value={assignedTo} placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)} />
-                                                        </Form.Group>
+                                                            <Form.Group controlId="formBasicAssignedTo">
+                                                                <Form.Label>Assigned To</Form.Label>
+                                                                <Form.Control type="text" value={assignedTo} placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)} />
+                                                            </Form.Group>
 
-                                                        <Form.Group controlId="formBasicDueDate">
-                                                            <Form.Label>Due Date (before)</Form.Label>
-                                                            <FormControl
-                                                                value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
-                                                                type={'date'}
-                                                                placeholder={'Due Date'}
-                                                                onChange={(val) => { setDueDate(val.target.valueAsDate) }}
-                                                            />
-                                                        </Form.Group>
+                                                            <Form.Group controlId="formBasicDueDate">
+                                                                <Form.Label>Due Date (before)</Form.Label>
+                                                                <FormControl
+                                                                    value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
+                                                                    type={'date'}
+                                                                    placeholder={'Due Date'}
+                                                                    onChange={(val) => { setDueDate(val.target.valueAsDate) }}
+                                                                />
+                                                            </Form.Group>
 
-                                                        <Button variant='success'
-                                                        disabled={ stringIsEmpty(ojtName) && stringIsEmpty(assignedTo)  }
-                                                        onClick={() => filterOJTsWithFields()}>
-                                                            Submit
+                                                            <Button variant='success'
+                                                                disabled={stringIsEmpty(ojtName) && stringIsEmpty(assignedTo)}
+                                                                onClick={() => filterOJTsWithFields()}>
+                                                                Submit
                                     </Button>       &nbsp;
                                                         <Button variant='light' onClick={() => clearFilters()}>
-                                                            Clear
+                                                                Clear
                                     </Button>
-                                                    </Form>
-                                                </Popover.Content>
-                                            </Popover>
-                                        }
-                                    >
-                                        <Button variant="secondary">Filters</Button>
-                                    </OverlayTrigger>
+                                                        </Form>
+                                                    </Popover.Content>
+                                                </Popover>
+                                            }
+                                        >
+                                            <Button variant="secondary">Filters</Button>
+                                        </OverlayTrigger>
                                     </Col>
                                 </Row>
-                                    
-                                
+
+
                             </div>
 
 
@@ -314,14 +316,14 @@ const MainOjtPage = props => {
                                                                         <Badge variant={row.active === true ? 'info' : 'warning'}>
                                                                             {row.active === true ? 'Active' : 'Inactive'}</Badge> &nbsp;
                                                                                 {row.status == "completed" ?
-                                                                                    <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'success'}>
-                                                                                        {'Completed'}
-                                                                                    </Badge> 
-                                                                                    : row.active === true ?
-                                                                                        <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'danger'}>
-                                                                                            {new Date().getTime() < new Date(row.due_date).getTime() ? 'Pending' : 'Past Due Date'}
-                                                                                        </Badge>
-                                                                                    : null}
+                                                                            <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'success'}>
+                                                                                {'Completed'}
+                                                                            </Badge>
+                                                                            : row.active === true ?
+                                                                                <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'danger'}>
+                                                                                    {new Date().getTime() < new Date(row.due_date).getTime() ? 'Pending' : 'Past Due Date'}
+                                                                                </Badge>
+                                                                                : null}
                                                                     </td>
                                                                     <td>
                                                                         {row.assigned_date ? new Date(row.assigned_date).toLocaleDateString() : null}
@@ -333,7 +335,7 @@ const MainOjtPage = props => {
                                                                         {row.questions != null ? row.questions.length : 0}
                                                                     </td>
                                                                     <td className={classes.lastTableData}>
-                                                                       {row.status === "completed" ? <IoMdCheckmark size={25} /> : <DropdownButton variant={'link'}
+                                                                        {row.status === "completed" ? <IoMdCheckmark size={25} /> : <DropdownButton variant={'link'}
                                                                             title={
                                                                                 <div style={{ display: 'inline-block', textDecoration: 'none' }}>
                                                                                     <MdMoreVert size={25} style={{ color: 'black' }} />
@@ -349,7 +351,7 @@ const MainOjtPage = props => {
                                                                                 {row.active === true ? 'Revoke OJT' : 'Assign OJT'}
                                                                             </Dropdown.Item>
                                                                         </DropdownButton>
-                                                                      }
+                                                                        }
                                                                     </td>
                                                                 </tr>
                                                             ))

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, ListGroup, Row, Col, Button, Badge, Modal } from 'react-bootstrap';
+import { Container, ListGroup, Row, Col, Button, Badge, Modal, Alert } from 'react-bootstrap';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { CircularProgress, Tooltip, makeStyles, Snackbar } from '@material-ui/core';
@@ -101,7 +101,9 @@ const ViewOjt = props => {
         <Container className={classes.viewOjtContainer} fluid>
             <BackDropComponent maskingText={maskingText} showBackdrop={showBackdrop} />
             <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setSnackbar(false)}>
-                <div className={classes.snackbarStyle} > {snackBarText} </div>
+            <Alert variant={'success'} onClose={() => setSnackbar(false)} dismissible>
+          {snackBarText}
+            </Alert>
             </Snackbar>
             <Modal show={open} onHide={handleClose} animation={false}>
                 <Modal.Header closeButton>
