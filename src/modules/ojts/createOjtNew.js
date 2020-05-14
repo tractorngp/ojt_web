@@ -4,6 +4,14 @@ import { IoIosCreate, IoMdTrash, IoMdCloudUpload, IoMdRemoveCircleOutline, IoMdA
 import { nullChecker } from '../../utils/commonUtils';
 import { Checkbox, Snackbar } from '@material-ui/core';
 import * as _ from 'lodash';
+import Lightbox from 'react-image-lightbox';
+
+
+const customStyles = {
+    overlay : {
+      zIndex: '9999'
+    }
+};
 
 const sampleQuestions = [];
 // {
@@ -31,7 +39,6 @@ const sampleQuestions = [];
 // }
 
 const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
-
     const [ojtName, setOjtName] = React.useState("");
     const [editState, setEditState] = React.useState(true);
     const [filesList, setFilesList] = React.useState([]);
@@ -40,7 +47,8 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
     const [snackBarText, setSnackbarText] = React.useState('');
     const [snackBarVariant, setSnackbarVariant] = React.useState("danger");
     const [openSnackbar, setSnackbar] = React.useState(false);
-
+    const [isLightBoxOpen, setLightBoxState] = React.useState(false);
+    const [photoIndex, setPhotoIndex] = React.useState(0);
 
     const validateTheQuestions = _ => {
         let validationPass = true;
@@ -141,6 +149,22 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
 
     return (
         <Container fluid style={{ maxWidth: '100%' }}>
+
+            {isLightBoxOpen ? (
+                <Lightbox reactModalStyle={customStyles}
+                    mainSrc={URL.createObjectURL(filesList[photoIndex])}
+                    nextSrc={URL.createObjectURL(filesList[(photoIndex + 1) % filesList.length])}
+                    prevSrc={URL.createObjectURL(filesList[(photoIndex + filesList.length - 1) % filesList.length])}
+                    onCloseRequest={() => setLightBoxState(false)}
+                    onMovePrevRequest={() =>
+                        setPhotoIndex((photoIndex + filesList.length - 1) % filesList.length)
+                    }
+                    onMoveNextRequest={() =>
+                        setPhotoIndex((photoIndex + 1) % filesList.length)
+                    }
+                />
+            ) : null}
+            
             <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
                 <Alert variant={snackBarVariant} onClose={() => setSnackbar(false)} dismissible>
                 {snackBarText}
@@ -153,7 +177,7 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
                         <Row style={{width: '100%'}}>
                         <Col md={10} style={{paddingLeft: '5%'}}>{fromCreate === true ? 'Create ' : 'Edit '} OJT</Col>
                             <Col md={2} style={{display: 'flex', flexDirection: 'row', justifyContent: 'end'}}><Button
-                            style={{display: (!fromCreate ? 'none' : 'inline-block'),float:'right'}}
+                            style={{display: (fromCreate ? 'none' : 'inline-block'),float:'right'}}
                             variant={'outline-secondary'}
                             onClick={()=> {
                                 console.log(editState);
@@ -194,7 +218,7 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
                                     <ListGroup.Item>
                                         <Row>
                                             <Col md={4}>
-                                                <img height={50} width={50} src={URL.createObjectURL(file)} />
+                                                <img height={50} width={50} src={URL.createObjectURL(file)}  onClick={()=>setLightBoxState(true)}/>
                                             </Col>
                                             <Col md={4}>
                                                 <p>{file.name}</p>

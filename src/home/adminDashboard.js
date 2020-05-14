@@ -11,6 +11,7 @@ import * as logo from './../assets/images/tractor_pg.png';
 import MainOjtPage from '../modules/ojts/Ojt';
 import { getStorageItem, setStorageItem } from '../utils/sessionStorageService';
 import { nullChecker, stringIsNotEmpty } from '../utils/commonUtils';
+import 'react-image-lightbox/style.css';
 
 const getCurrentTab = _ => {
   const currentTab = window.sessionStorage.getItem('currentTab');
