@@ -1,33 +1,34 @@
 import React from 'react';
-import { Container, Modal, FormControl, Button, Row, Col, ListGroup, Form } from 'react-bootstrap';
+import { Container, Modal, FormControl, Button, Row, Col, ListGroup, Form, Alert } from 'react-bootstrap';
 import { IoIosCreate, IoMdTrash, IoMdCloudUpload, IoMdRemoveCircleOutline, IoMdAdd } from 'react-icons/io';
 import { nullChecker } from '../../utils/commonUtils';
-import { Checkbox } from '@material-ui/core';
+import { Checkbox, Snackbar } from '@material-ui/core';
 import * as _ from 'lodash';
 
-const sampleQuestions = [{
-    "question_text": "Question 1",
-    "options": [
-        "Answer 1",
-        "Answer 2",
-        "Answer 3"
-    ],
-    "correct_answers": [
-        "Answer 1",
-        "Answer 2"
-    ]
-}, {
-    "question_text": "Question 2",
-    "options": [
-        "Answer 11",
-        "Answer 12",
-        "Answer 13"
-    ],
-    "correct_answers": [
-        "Answer 11",
-        "Answer 12"
-    ]
-}];
+const sampleQuestions = [];
+// {
+//     "question_text": "Question 1",
+//     "options": [
+//         "Answer 1",
+//         "Answer 2",
+//         "Answer 3"
+//     ],
+//     "correct_answers": [
+//         "Answer 1",
+//         "Answer 2"
+//     ]
+// }, {
+//     "question_text": "Question 2",
+//     "options": [
+//         "Answer 11",
+//         "Answer 12",
+//         "Answer 13"
+//     ],
+//     "correct_answers": [
+//         "Answer 11",
+//         "Answer 12"
+//     ]
+// }
 
 const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
 
@@ -36,6 +37,67 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
     const [filesList, setFilesList] = React.useState([]);
     const uploadRef = React.useRef(null);
     const [ Questions, setQuestions ] = React.useState(sampleQuestions);
+    const [snackBarText, setSnackbarText] = React.useState('');
+    const [snackBarVariant, setSnackbarVariant] = React.useState("danger");
+    const [openSnackbar, setSnackbar] = React.useState(false);
+
+
+    const validateTheQuestions = _ => {
+        let validationPass = true;
+        if(ojtName == null || ojtName.trim() == ""){
+            validationPass = false;
+            showSnackBar("OJT Name can't be empty!", "danger");
+            return;
+        }
+        else if(nullChecker(Questions)){
+            if(Questions.length <= 0){
+                validationPass = false;
+                showSnackBar("Questions can't be empty!", "danger");
+                return;
+            }
+            else{
+                for(let index = 0; index < Questions.length; index++){
+                    if(Questions[index].question_text == null || Questions[index].question_text.trim() == ""){
+                        validationPass = false;
+                        showSnackBar(`Question ${index+1} text can't be empty!`, "danger");
+                        return;
+                    }
+                    if(Questions[index].options == null || Questions[index].options.length <= 1){
+                        validationPass = false;
+                        showSnackBar("You need to add atleast 2 options!", "danger");
+                        return;
+                    }
+                    if(Questions[index].options != null || Questions[index].options.length > 1){
+                        for(let aindex = 0;aindex<Questions[index].options.length;aindex++){
+                            if(Questions[index].options[aindex] == null || Questions[index].options[aindex].trim() == ""){
+                                validationPass = false;
+                                showSnackBar(`Option ${aindex+1} text can't be empty!`, "danger");
+                                return;
+                            }
+                        }
+                    }
+                    if(Questions[index].correct_answers == null || Questions[index].correct_answers.length == 0){
+                        validationPass = false;
+                        showSnackBar("You need to add atleast 1 correct answer!", "danger");
+                        return;
+                    }
+                }
+                if(validationPass == true)
+                showSnackBar("Good to go!", "success");
+            }
+        }
+        else{
+            validationPass = false;
+            showSnackBar("Questions can't be empty!", "danger");
+            return;
+        }
+    }
+
+    const showSnackBar = (text,variant) =>{
+        setSnackbarVariant(variant);
+        setSnackbarText(text);
+        setSnackbar(true);
+    }
 
     const addToFilesList = fileList => {
         let tempList = [...filesList];
@@ -78,176 +140,221 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
     }, [Questions]);
 
     return (
-        <Modal show={ojtOpen} size={'lg'} onHide={() => ojtDispatch(false)} animation={false}>
-            <Modal.Header closeButton>
-                <Modal.Title>
-                    {fromCreate === true ? 'Create ' : 'Edit '}
-                     OJT
-                        <Button
-                        style={{display: (!fromCreate ? 'none' : 'inline-block'),float:'right'}}
-                        variant={'outline-secondary'}
-                        onClick={()=> {
-                            console.log(editState);
-                            setEditState(!editState);
-                        }}
-                        > <IoIosCreate /> Edit </Button> </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-            <Container style={{maxHeight:'70vh',overflowY:'auto'}}>
-                <FormControl readOnly={!editState}
-                    maxLength={50}
-                    onChange={(val) => setOjtName(val.target.value)}
-                    value={ojtName}
-                    placeholder={'Enter OJT Name...'} />
-
-                <hr />
-                <Form.Label> Media </Form.Label>
-                <div style={{display: (!editState ? 'none' : 'inline-block')}}>
-                        <Button variant={'info'}
-                            onClick={() => {
-                                uploadRef.current.click()
+        <Container fluid style={{ maxWidth: '100%' }}>
+            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setSnackbar(false)}>
+                <Alert variant={snackBarVariant} onClose={() => setSnackbar(false)} dismissible>
+                {snackBarText}
+                </Alert>
+            </Snackbar>
+        
+            <Modal show={ojtOpen} size={'lg'} onHide={() => ojtDispatch(false)} animation={false}>
+                <Modal.Header closeButton>
+                    <Modal.Title style={{width: '100%'}}>
+                        <Row style={{width: '100%'}}>
+                        <Col md={10} style={{paddingLeft: '5%'}}>{fromCreate === true ? 'Create ' : 'Edit '} OJT</Col>
+                            <Col md={2} style={{display: 'flex', flexDirection: 'row', justifyContent: 'end'}}><Button
+                            style={{display: (!fromCreate ? 'none' : 'inline-block'),float:'right'}}
+                            variant={'outline-secondary'}
+                            onClick={()=> {
+                                console.log(editState);
+                                setEditState(!editState);
                             }}
-                        > <IoMdCloudUpload /> Add Media</Button>  <Form.Label> (Only .png, .jpeg) </Form.Label>
-                </div>
-                <br /><br />
-                {/* controls section end -- media section */}
-                <input ref={uploadRef} multiple={true} style={{ display: 'none' }} accept={'image/*'} type="file" onChange={(val) => addToFilesList(val.target.files)} />
-                <div id="files">
-                {
-                    filesList.length > 0 ? <ListGroup>
-                        <ListGroup.Item color={'#d9534f'}> Media (Click on image to enlarge) </ListGroup.Item>
-                        {
-                            filesList.map(file => (
-                                <ListGroup.Item>
+                            > <IoIosCreate /> Edit </Button> </Col>
+                            </Row>
+                            </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                <Container style={{maxHeight:'70vh',overflowY:'auto'}}>
+                    <FormControl readOnly={!editState}
+                        maxLength={50}
+                        onChange={(val) => setOjtName(val.target.value)}
+                        value={ojtName}
+                        placeholder={'Enter OJT Name...'} />
+
+                    <hr />
+                    <Alert key={1} variant={'secondary'}>
+                        <Row><Col><h5 style={{ margin: '0'}}>Add Media (Preferred Dimensions: (1429 × 764) *Only .png, .jpeg*)</h5></Col></Row>
+                    </Alert>
+                    <div style={{display: (!editState ? 'none' : 'inline-block')}}>
+                            <Button variant={'info'}
+                                onClick={() => {
+                                    uploadRef.current.click()
+                                }}
+                            > <IoMdCloudUpload /> Click to Upload</Button>
+                    </div>
+                    <br /><br />
+                    {/* controls section end -- media section */}
+                    <input ref={uploadRef} multiple={true} style={{ display: 'none' }} accept={'image/*'} type="file" onChange={(val) => addToFilesList(val.target.files)} />
+                    <div id="files">
+                    {
+                        filesList.length > 0 ? <ListGroup style={{paddingBottom: '2.0vh'}}>
+                            <ListGroup.Item color={'#d9534f'}> Media (Click on image to enlarge) </ListGroup.Item>
+                            {
+                                filesList.map(file => (
+                                    <ListGroup.Item>
+                                        <Row>
+                                            <Col md={4}>
+                                                <img height={50} width={50} src={URL.createObjectURL(file)} />
+                                            </Col>
+                                            <Col md={4}>
+                                                <p>{file.name}</p>
+                                            </Col>
+                                            <Col md={4}>
+                                                <Button
+                                                style={{display: (!editState ? 'none' : 'inline-block')}}
+                                                variant={'danger'}
+                                                onClick={()=>removeFromFileList(file)}
+                                                > <IoMdRemoveCircleOutline /> </Button>
+                                            </Col>
+                                        </Row> </ListGroup.Item>
+                                ))
+                            }
+                        </ListGroup> : null
+
+                    }
+                    </div>
+                    <div>
+                    <Alert key={2} variant={'secondary'}>
+                        <Row>
+                            <Col md={8} style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                                <h5 style={{ margin: '0'}}>Questions</h5>
+                            </Col>
+                            <Col md={4} style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end'}}>
+                                <div>
+                                    <Button
+                                        style={{display: (!editState ? 'none' : 'inline-block')}}
+                                        variant={'dark'}
+                                        onClick={addQuestion}
+                                        > <IoMdAdd /> </Button>
+                                </div>
+                            </Col>
+                        </Row>                        
+                            
+                    </Alert>
+                    
+                    </div>
+
+                    <div style={{padding:'1.5rem'}}>
+                    {
+                        nullChecker(Questions) ?
+                            Questions.map((question, index) => (
+
+                                <form>
                                     <Row>
                                         <Col md={4}>
-                                            <img height={50} width={50} src={URL.createObjectURL(file)} />
+                                            <Alert key={3} variant={'secondary'} style={{padding: '5px 0px 0px 15px'}}>
+                                                <h5>Question {index + 1}</h5>
+                                            </Alert>
                                         </Col>
-                                        <Col md={4}>
-                                            <p>{file.name}</p>
+                                    </Row>
+                                    <Row>
+                                        <Col md={10}>
+                                        <FormControl placeholder={`Question ${index+1}`}
+                                        maxLength={50}
+                                        onChange={
+                                            (val) => {
+                                                let questions = _.cloneDeep(Questions);
+                                                questions[index]['question_text'] = val.target.value;
+                                                setQuestions(questions);
+                                            }
+                                        }
+                                        defaultValue={question.question_text} readOnly={!editState} />
                                         </Col>
-                                        <Col md={4}>
+                                        <Col  md={1}>
                                             <Button
                                             style={{display: (!editState ? 'none' : 'inline-block')}}
-                                            variant={'danger'}
-                                            onClick={()=>removeFromFileList(file)}
-                                            > <IoMdRemoveCircleOutline /> </Button>
+                                            variant={'outline-dark'}
+                                            onClick={()=>{
+                                                addOption(index)
+                                            }} > <IoMdAdd /> </Button>
                                         </Col>
-                                    </Row> </ListGroup.Item>
-                            ))
-                        }
-                    </ListGroup> : null
-
-                }
-                </div>
-                <Container>
-                <Button
-                style={{display: (!editState ? 'none' : 'inline-block'),float:'right'}}
-                variant={'outline-secondary'}
-                onClick={addQuestion}
-                > Add Question </Button>
-                <Form.Label> Questions </Form.Label>
-                </Container>
-
-                <div style={{padding:'2rem'}}>
-                {
-                    nullChecker(Questions) ?
-                        Questions.map((question, index) => (
-
-                            <form>
-                                <Row>
-                                    <Col md={10}>
-                                    <FormControl placeholder={`Question ${index}`}
-                                    maxLength={50}
-                                    onChange={
-                                        (val) => {
-                                            let questions = _.cloneDeep(Questions);
-                                            questions[index]['question_text'] = val.target.value;
-                                            setQuestions(questions);
-                                        }
-                                    }
-                                    defaultValue={question.question_text} readOnly={!editState} />
-                                    </Col>
-                                    <Col  md={2}>
-                                        <Button
-                                        style={{display: (!editState ? 'none' : 'inline-block')}}
-                                        variant={'outline-secondary'}
-                                        onClick={()=>{
-                                            addOption(index)
-                                        }} > <IoMdAdd /> </Button>
-                                    </Col>
-                                </Row>
-                                
-                                    <br />
-                                {
-                                    nullChecker(question.options) ?
-                                        question.options.map((option, aindex) => (
-                                            <Row>
-                                                <Col md={1}>
-                                                    <Checkbox 
-                                                    onChange={(val) => {
-                                                        
-                                                        let questions = _.cloneDeep(Questions);
-                                                        if(val.target.checked){
-                                                            questions[index]['correct_answers'].push(option);
-                                                        }else{
-                                                            let indexOf =  questions[index]['correct_answers'].indexOf(option);
-                                                            questions[index]['correct_answers'].splice(indexOf,1);
-                                                        }
-                                                        setQuestions(questions);
-                                                    }}
-                                                    color={'primary'}
-                                                    disabled={!editState}
-                                                    checked={question.correct_answers.includes(option)}
-                                                    />
-                                                </Col>
-                                                <Col md={10}>
-                                                    <FormControl
-                                                    maxLength={50}
-                                                    disabled={!editState}
-                                                    onChange={
-                                                        (val) => {
+                                        <Col md={1}>
+                                            <Button 
+                                            onClick={()=> {
+                                                Questions.splice(index,1);
+                                                let questions = _.cloneDeep(Questions);
+                                                setQuestions(questions);
+                                            }}
+                                            style={{display: (!editState ? 'none' : 'inline-block')}} variant={'danger'}> <IoMdTrash /> </Button>
+                                        </Col>
+                                    </Row>
+                                    
+                                        <br />
+                                    {
+                                        nullChecker(question.options) ?
+                                            question.options.map((option, aindex) => (
+                                                <Row>
+                                                    <Col md={1}>
+                                                        <Checkbox 
+                                                        onChange={(val) => {
+                                                            
                                                             let questions = _.cloneDeep(Questions);
-                                                            questions[index]['options'][aindex] = val.target.value;
+                                                            if(val.target.checked){
+                                                                questions[index]['correct_answers'].push(option);
+                                                            }else{
+                                                                let indexOf =  questions[index]['correct_answers'].indexOf(option);
+                                                                questions[index]['correct_answers'].splice(indexOf,1);
+                                                            }
                                                             setQuestions(questions);
+                                                        }}
+                                                        color={'primary'}
+                                                        disabled={!editState}
+                                                        checked={question.correct_answers.includes(option)}
+                                                        />
+                                                    </Col>
+                                                    <Col md={7}>
+                                                        <FormControl
+                                                        maxLength={50}
+                                                        disabled={!editState}
+                                                        onChange={
+                                                            (val) => {
+                                                                let questions = _.cloneDeep(Questions);
+                                                                questions[index]['options'][aindex] = val.target.value;
+                                                                setQuestions(questions);
+                                                            }
                                                         }
-                                                    }
-                                                    type={'text'} placeholder={'Answer..'} defaultValue={option}
-                                                    />
-                                                </Col>
-                                                <Col md={1}>
-                                                    <Button 
-                                                    onClick={()=> {
-                                                        Questions[index]['options'].splice(aindex,1);
-                                                        let questions = _.cloneDeep(Questions);
-                                                        setQuestions(questions);
-                                                    }}
-                                                    style={{display: (!editState ? 'none' : 'inline-block')}} variant={'danger'}> <IoMdTrash /> </Button>
-                                                </Col>
-                                            </Row>
-                                        )) : (editMode === true ? 'Add Answers' : 'No Answers')
-                                }
-                                <br />
-                            </form>
+                                                        type={'text'} placeholder={`Option ${aindex+1}`} defaultValue={option}
+                                                        />
+                                                    </Col>
+                                                    <Col md={1}>
+                                                        <Button 
+                                                        onClick={()=> {
+                                                            Questions[index]['options'].splice(aindex,1);
+                                                            let questions = _.cloneDeep(Questions);
+                                                            setQuestions(questions);
+                                                        }}
+                                                        style={{display: (!editState ? 'none' : 'inline-block')}} variant={'danger'}> <IoMdTrash /> </Button>
+                                                    </Col>
+                                                </Row>
+                                            )) : (editMode === true ? 'Add Answers' : 'No Answers')
+                                    }
+                                    <br />
+                                </form>
 
-                        )) : (editMode === true ? 'Add Questions' : 'No Questions')
-                }
-                </div>
-                </Container>
-            </Modal.Body>
-            <Modal.Footer>
-            <Button 
-                onClick={() =>
-                    ojtDispatch()
-                }
-                variant={'light'} >Cancel</Button>
-                <Button 
-                onClick={() =>
-                    {console.log(Questions)}
-                }
-                variant={'success'} >Submit</Button>
-            </Modal.Footer>
-        </Modal>
+                            )) : (editMode === true ? 'Add Questions' : 'No Questions')
+                    }
+                    </div>
+                    </Container>
+                </Modal.Body>
+                
+                <Modal.Footer style={{display: (!editState ? 'none' : 'flex'), flexDirection: 'row', alignItems:'flex-end'}}>
+                    <Button 
+                        onClick={() =>
+                            ojtDispatch()
+                        }
+                        variant={'light'} >Cancel</Button>
+                        <Button 
+                        onClick={() =>
+                            {
+                                console.log(Questions)
+                                validateTheQuestions()
+                            }
+                        }
+                        variant={'success'} >Submit</Button>
+                </Modal.Footer> 
+                
+            </Modal>
+        </Container>
     );
 };
 
