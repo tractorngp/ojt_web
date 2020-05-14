@@ -7,6 +7,7 @@ import { IoMdInformationCircleOutline, IoMdPeople, IoMdAdd } from 'react-icons/i
 import AssignOJT from './assignOjt';
 import { BackDropComponent, PageLoaderComponent } from '../../components/pageLoaderComponent';
 import CreateOJTNew from './createOjtNew';
+import Spinner from 'react-spinkit';
 
 const OJT_TEMPLATES = 'ojt_templates';
 const useStyles = makeStyles(theme => ({
@@ -144,7 +145,8 @@ const ViewOjt = props => {
                     }}><IoMdAdd size={25} /></Button></div>
                 {
                     loading === true ?
-                    <span> <CircularProgress size={15} /> <p> Fetching OJT Templates... </p></span>
+                    <span style={{width: '100%', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}> <Spinner name="line-scale-pulse-out-rapid" fadeIn={'none'} color={'#d9534f'} style={{width: '20%'}}>
+                    </Spinner> <p> Fetching OJT Templates... </p></span>
                     :
                     <span>
 { 
