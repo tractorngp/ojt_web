@@ -10,40 +10,56 @@ import tractorPg from './../assets/images/tractor_pg.png';
 import mahindraRise from './../assets/images/mahindra_rise.png';
 import { IoMdArrowForward } from 'react-icons/io';
 import { setStorageItem } from '../utils/sessionStorageService';
-import { Button } from 'react-bootstrap';
+import { Button, Row, Col, Alert } from 'react-bootstrap';
 import { BackDropComponent } from '../components/pageLoaderComponent';
 
 const useStyles = makeStyles((theme) => ({
 
     loginBox: {
-        //marginTop: '5vh',
-        padding: '10vh'
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        verticalAlign: 'middle',
+        width: '100%',
+        height: '100%',
+        paddingTop: '10%'
     },
     inputStyle: {
         display: 'flex',
-        margin: '1rem',
-        width: '50%',
-        marginLeft: '25%',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        verticalAlign: 'middle',
+        marginTop: '1rem',
+        marginBottom: '1rem',
+        width: '100%',
         [theme.breakpoints.up('xs')]: {
-            width: '100%',
+            width: '75%',
             marginLeft: '0'
         },
         [theme.breakpoints.up('md')]: {
-            marginLeft: '35%',
-            width: '30%',
+            width: '100%',
         }
     },
     loginBtn: {
         padding: '15px 50px 15px 50px'
     },
     headerImg: {
+        // [theme.breakpoints.up('xs')]: {
+        //     width: '125px',
+        //     height: '100%'
+        // },
+        // [theme.breakpoints.up('md')]: {
+        //     width: '200px',
+        //     height: '100%'
+        // }
+    },
+    headerText: {
         [theme.breakpoints.up('xs')]: {
-            width: '125px',
-            height: '100%'
+            display:"flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'
         },
         [theme.breakpoints.up('md')]: {
-            width: '200px',
-            height: '100%'
+            display:"flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'start', width: '100%', height: '100%'
         }
     }
 
@@ -111,15 +127,29 @@ const Login = props => {
         <div id="fc-login" className={classes.loginBox}>
             <BackDropComponent showBackdrop={loading} maskingText={'Logging In...'} />
             <form method={'POST'} ref={formRef}>
-                <div className={classes.headerImages}>
-                    <img className={classes.headerImg} src={tractorPg} alt={''} />
-                    <img className={classes.headerImg} width={300} height={100} src={mahindraRise} alt={'Mahindra Rise'} />
-                </div>
+                <Row>
+                    <Col md={4}>
+                        <div className={classes.headerImages}>
+                            <img className={classes.headerImg} width={100} height={100} src={tractorPg} alt={''} />
+                            <img className={classes.headerImg} width={100} height={40} src={mahindraRise} alt={'Mahindra Rise'} />
+                        </div>
+                    </Col>
+                    <Col md={8}>
+                        <div className={classes.headerText}>
+                            <h3 style={{ margin: '0', color: 'dark-grey', fontWeight: '900', fontFamily:'sans-serif'}}>OJT App Login</h3>
+                        </div>
+                    </Col>
+                </Row>
                 <br />
-                <TextField required className={classes.inputStyle} type={'text'} name={'tokenId'} id="standard-basic" label="Enter Token ID" />
-                <br /><br />
-                <TextField required name={'password'} className={classes.inputStyle} type={'password'} id="standard-basic" label="Enter Password" />
-                <br /><br />
+                <Row style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '2%', margin: '0'}}>
+                    <Col style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                        <TextField required className={classes.inputStyle} type={'text'} name={'tokenId'} id="standard-basic" label="Enter Token ID" />
+                        <br /><br />
+                        <TextField required name={'password'} className={classes.inputStyle} type={'password'} id="standard-basic" label="Enter Password" />
+                        <br /><br />
+                    </Col>
+                </Row>
+                
                 <Button className={classes.loginBtn} onClick={handleLogin} disabled={loading} type={'submit'} name={'loginSubmit'} variant="danger">
                     Sign In &nbsp; <IoMdArrowForward size={20} />
                 </Button>

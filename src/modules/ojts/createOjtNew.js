@@ -42,12 +42,15 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
     const [ojtName, setOjtName] = React.useState("");
     const [editState, setEditState] = React.useState(true);
     const [filesList, setFilesList] = React.useState([]);
+    const [existingFiles, setExistingFiles] = React.useState([]);
     const uploadRef = React.useRef(null);
     const [ Questions, setQuestions ] = React.useState(sampleQuestions);
     const [snackBarText, setSnackbarText] = React.useState('');
     const [snackBarVariant, setSnackbarVariant] = React.useState("danger");
     const [openSnackbar, setSnackbar] = React.useState(false);
+    const [lightBoxFiles, setLightBoxFiles] = React.useState([]);
     const [isLightBoxOpen, setLightBoxState] = React.useState(false);
+    const [isFromExistingFiles, setFromExistingFiles] = React.useState(false);
     const [photoIndex, setPhotoIndex] = React.useState(0);
 
     const validateTheQuestions = _ => {
@@ -124,6 +127,15 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
         setFilesList(newFilesList);
     }
 
+    const removeFromExistingFileList = fileItem => {
+        let newFilesList = [];
+        existingFiles.forEach(f => {
+            if(f !== fileItem)
+                newFilesList.push(f);
+        });
+        setExistingFiles(newFilesList);
+    }
+
     const addQuestion = kk => {
         const qformat = {
             question_text: "",
@@ -144,6 +156,7 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
 
     React.useEffect(_ => {
         //setEditState(editMode);
+        setExistingFiles(["https://firebasestorage.googleapis.com/v0/b/ojtappl.appspot.com/o/images%2F2020-05-10T10%3A11%3A44.225Z?alt=media&token=04461392-214e-4d36-9e70-5569eaffd8b2"]);
         setQuestions(Questions);
     }, [Questions]);
 
@@ -152,15 +165,15 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
 
             {isLightBoxOpen ? (
                 <Lightbox reactModalStyle={customStyles}
-                    mainSrc={URL.createObjectURL(filesList[photoIndex])}
-                    nextSrc={URL.createObjectURL(filesList[(photoIndex + 1) % filesList.length])}
-                    prevSrc={URL.createObjectURL(filesList[(photoIndex + filesList.length - 1) % filesList.length])}
+                    mainSrc={(isFromExistingFiles ? lightBoxFiles[photoIndex] : URL.createObjectURL(lightBoxFiles[photoIndex]))}
+                    nextSrc={(isFromExistingFiles ? (lightBoxFiles[(photoIndex + 1) % lightBoxFiles.length]) : URL.createObjectURL(lightBoxFiles[(photoIndex + 1) % lightBoxFiles.length]))}
+                    prevSrc={(isFromExistingFiles ? (lightBoxFiles[(photoIndex + lightBoxFiles.length - 1) % lightBoxFiles.length]) : (URL.createObjectURL(lightBoxFiles[(photoIndex + lightBoxFiles.length - 1) % lightBoxFiles.length])))}
                     onCloseRequest={() => setLightBoxState(false)}
                     onMovePrevRequest={() =>
-                        setPhotoIndex((photoIndex + filesList.length - 1) % filesList.length)
+                        setPhotoIndex((photoIndex + lightBoxFiles.length - 1) % lightBoxFiles.length)
                     }
                     onMoveNextRequest={() =>
-                        setPhotoIndex((photoIndex + 1) % filesList.length)
+                        setPhotoIndex((photoIndex + 1) % lightBoxFiles.length)
                     }
                 />
             ) : null}
@@ -218,7 +231,11 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
                                     <ListGroup.Item>
                                         <Row>
                                             <Col md={4}>
-                                                <img height={50} width={50} src={URL.createObjectURL(file)} alt={'Attached File'} onClick={()=>setLightBoxState(true)}/>
+                                                <img height={50} width={50} alt={'Attached File'} src={URL.createObjectURL(file)}  onClick={()=>{
+                                                    setFromExistingFiles(false)
+                                                    setLightBoxFiles(filesList)
+                                                    setLightBoxState(true)
+                                                }}/>
                                             </Col>
                                             <Col md={4}>
                                                 <p>{file.name}</p>
@@ -235,6 +252,43 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
                             }
                         </ListGroup> : null
 
+                    }
+                    {
+                        existingFiles.length > 0 ?
+                            <ListGroup style={{paddingBottom: '2.0vh'}}>
+                                <Row>
+                                    <Col md={12}>
+                                        <Alert key={4} variant={'secondary'}>
+                                            <h5 style={{ margin: '0'}}>Existing Files</h5>
+                                        </Alert>
+                                    </Col>
+                                </Row>
+                                <ListGroup.Item color={'#d9534f'}> Media (Click on image to enlarge) </ListGroup.Item>
+                                {
+                                    existingFiles.map(file => (
+                                        <ListGroup.Item>
+                                            <Row>
+                                                <Col md={4}>
+                                                    <img height={50} width={50} alt={'Attached File'} src={file}  onClick={()=>{
+                                                        setFromExistingFiles(true)
+                                                        setLightBoxFiles(existingFiles)
+                                                        setLightBoxState(true)
+                                                    }}/>
+                                                </Col>
+                                                <Col md={4}>
+                                                    <p>{file.name}</p>
+                                                </Col>
+                                                <Col md={4}>
+                                                    <Button
+                                                    style={{display: (!editState ? 'none' : 'inline-block')}}
+                                                    variant={'danger'}
+                                                    onClick={()=>removeFromExistingFileList(file)}
+                                                    > <IoMdRemoveCircleOutline /> </Button>
+                                                </Col>
+                                            </Row> </ListGroup.Item>
+                                    ))
+                                }
+                            </ListGroup> : null
                     }
                     </div>
                     <div>
