@@ -307,7 +307,7 @@ const MainOjtPage = props => {
                                                                     <Form.Group controlId="formBasicStatus">
                                                                         <Form.Label>Status</Form.Label>
                                                                         <Form.Control as="select" value={filterStatus} placeholder="Select Status" onChange={(val) => setStatusFilter(val.target.value)} >
-                                                                            <option value={'none'}> -- Select a Status -- </option>
+                                                                            <option value={'none'}>Select a Status</option>
                                                                             <option value='Active' > Active </option>
                                                                             <option value='Inactive' >Inactive</option>
                                                                         </Form.Control>
@@ -320,7 +320,7 @@ const MainOjtPage = props => {
                                                                     <Form.Group controlId="formBasicActivity">
                                                                         <Form.Label>Activity</Form.Label>
                                                                         <Form.Control as="select" value={filterActivity} placeholder="Select activity" onChange={(val) => setActivityFilter(val.target.value)} >
-                                                                            <option value={'none'}> -- Select activity -- </option>
+                                                                            <option value={'none'}>Select activity</option>
                                                                             <option value={'Past Due Date'}> Past Due Date </option>
                                                                             <option value={'Pending'}> Pending </option>
                                                                             <option value={'Completed'}> Completed </option>
