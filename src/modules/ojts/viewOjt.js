@@ -181,8 +181,8 @@ export const ViewOjt = props => {
             <CreateOJTNew ojtState={ojtState}  />
             </Modal>
             
-                <div style={{ display:'flex', flexDirection: 'row-reverse', width:'100%', marginTop:'1.0vh', marginBottom: '1.0vh' }}>
-                    <Button variant="danger" style={{width:'10%'}} onClick={()=> {
+                <div style={{ display:'flex', flexDirection: 'row-reverse', width:'90%', marginTop:'1.0vh', marginBottom: '1.0vh' }}>
+                    <Button variant="danger" style={{width:'13%'}} onClick={()=> {
                         ojtStateDispatch({
                             type:'ALL',
                             fromCreate: true,
