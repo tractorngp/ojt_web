@@ -12,6 +12,7 @@ import { PageLoaderComponent, BackDropComponent } from '../../components/pageLoa
 import { IoMdSettings, IoMdCheckmark } from 'react-icons/io';
 import { MdMoreVert } from 'react-icons/md';
 import * as moment from 'moment';
+import { useForm } from 'react-hook-form';
 
 const initialPageState = {
     name: null,
@@ -43,11 +44,11 @@ function createData(active, assigned_to, group_id, images, no_of_attempts, ojt_n
 
 const MainOjtPage = props => {
     const classes = useStyles();
-    const [allOJTrows, setOJTs] = React.useState([]);
     const [totalOJTsCount, setTotalCount] = React.useState([]);
     const [ojtName, setOjtName] = React.useState([]);
     const [assignedTo, setAssignedTo] = React.useState([]);
     const [dueDate, setDueDate] = React.useState(new Date());
+    const [filteredOJTsList, setFilteredOJTsList] = React.useState([]);
     const [all_ojts_full, setAssignedOJTs] = React.useState([]);
     const [open, setOpen] = React.useState(false);
     const { state } = React.useContext(UserContext);
@@ -57,6 +58,10 @@ const MainOjtPage = props => {
     const [loading, setLoading] = React.useState(true);
     const [paginationState, setPaginationState] = React.useState(initialPageState);
     const db = firebase.firestore();
+    const { handleSubmit, register, errors } = useForm();
+
+    const [filterStatus, setStatusFilter] = React.useState("");
+    const [filterActivity, setActivityFilter] = React.useState("");
 
 
     const handleStatusSwitch = async (val, row) => {
@@ -83,8 +88,8 @@ const MainOjtPage = props => {
         let initialState = paginationState;
         setPaginationState(paginationState);
         let slicedList = [];
-        slicedList = all_ojts_full.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
-        setOJTs(slicedList);
+        slicedList = filteredOJTsList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+        setFilteredOJTsList(slicedList);
         console.log("Load new pages")
 
         // getAssignedOJTsCount();
@@ -94,10 +99,11 @@ const MainOjtPage = props => {
         let tempList1 = [];
         let tempList2 = [];
         let tempList3 = [];
-
-        if (all_ojts_full != null && all_ojts_full.length > 0) {
+        let tempList4 = [];
+        let tempList5 = [];
+        if (filteredOJTsList != null && filteredOJTsList.length > 0) {
             if (ojtName != null && ojtName.trim() !== "") {
-                tempList1 = await all_ojts_full.filter(rec => {
+                tempList1 = await filteredOJTsList.filter(rec => {
                     if (rec['ojt_name'].toLowerCase().includes(ojtName.toLowerCase())) {
                         return rec;
                     }
@@ -133,11 +139,48 @@ const MainOjtPage = props => {
                 tempList3 = tempList2;
             }
 
-            setTotalCount(tempList3.length);
+            if(filterStatus != null && filterStatus.trim() !== ""){
+                tempList4 = await tempList3.filter(rec => {
+                    if(filterStatus == "Active")
+                    return rec.active
+                    else
+                    return !rec.active
+                })
+            }
+            else{
+                tempList4 = tempList3
+            }
 
-            tempList3 = tempList3.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+            if(filterActivity != null && filterActivity.trim() !== ""){
+                tempList5 = await tempList4.filter(rec => {
+                    if(filterActivity == "Completed"){
+                        return (rec.status == "completed")
+                    }
+                    else if(filterActivity == "Past Due Date"){
+                        let rec_date = new Date(rec.due_date)
+                        rec_date.setHours(0)
+                        rec_date.setMinutes(0)
+                        rec_date.setSeconds(0)
+                        let current_date = new Date()
+                        current_date.setHours(0)
+                        current_date.setMinutes(0)
+                        current_date.setSeconds(0)
+                        return (moment(rec_date).diff(current_date, 'days') < 0)
+                    }
+                    else if(filterActivity == "Pending"){
+                        return (rec.status == "assigned")
+                    }
+                })
+            }
+            else{
+                tempList5 = tempList4
+            }
 
-            setOJTs(tempList3);
+            setTotalCount(tempList5.length);
+
+            tempList5 = tempList5.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+
+            setFilteredOJTsList(tempList5)
         }
         else {
             console.log("No results to return");
@@ -150,7 +193,7 @@ const MainOjtPage = props => {
         setAssignedTo("");
         setDueDate(new Date());
         let tempList = all_ojts_full.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
-        setOJTs(tempList);
+        setFilteredOJTsList(tempList);
     }
 
     const getAllOJTs = async _ => {
@@ -178,13 +221,13 @@ const MainOjtPage = props => {
                             let initialState = paginationState;
                             let slicedList = tempList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
                             setAssignedOJTs(tempList);
-                            setOJTs(slicedList);
+                            setFilteredOJTsList(slicedList);
                             setLoading(false);
                         }
                     });
                 }
                 else {
-                    setOJTs(tempList);
+                    setFilteredOJTsList(tempList);
                     setLoading(false);
                 }
             }, error => {
@@ -232,27 +275,59 @@ const MainOjtPage = props => {
                                             overlay={
                                                 <Popover id={`popover-positioned-${'bottom'}`}>
                                                     <Popover.Title as="h3">{'Filter By:'}</Popover.Title>
-                                                    <Popover.Content>
+                                                    <Popover.Content style={{width: '100%'}}>
                                                         <Form>
-                                                            <Form.Group controlId="formBasicOJTName">
-                                                                <Form.Label>OJT Name</Form.Label>
-                                                                <Form.Control type="text" value={ojtName} placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)} />
-                                                            </Form.Group>
-
-                                                            <Form.Group controlId="formBasicAssignedTo">
-                                                                <Form.Label>Assigned To</Form.Label>
-                                                                <Form.Control type="text" value={assignedTo} placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)} />
-                                                            </Form.Group>
-
-                                                            <Form.Group controlId="formBasicDueDate">
-                                                                <Form.Label>Due Date (before)</Form.Label>
-                                                                <FormControl
-                                                                    value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
-                                                                    type={'date'}
-                                                                    placeholder={'Due Date'}
-                                                                    onChange={(val) => { setDueDate(val.target.valueAsDate) }}
-                                                                />
-                                                            </Form.Group>
+                                                            <Row>
+                                                                <Col>
+                                                                    <Form.Group controlId="formBasicOJTName">
+                                                                        <Form.Label>OJT Name</Form.Label>
+                                                                        <Form.Control type="text" value={ojtName} placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)} />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                                <Col>
+                                                                    <Form.Group controlId="formBasicAssignedTo">
+                                                                        <Form.Label>Assigned To</Form.Label>
+                                                                        <Form.Control type="text" value={assignedTo} placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)} />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                            </Row>
+                                                            <Row>
+                                                                <Col md={6}>
+                                                                    <Form.Group controlId="formBasicDueDate">
+                                                                        <Form.Label>Due Date (before)</Form.Label>
+                                                                        <FormControl
+                                                                            value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
+                                                                            type={'date'}
+                                                                            placeholder={'Due Date'}
+                                                                            onChange={(val) => { setDueDate(val.target.valueAsDate) }}
+                                                                        />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                                <Col md={6}>
+                                                                    <Form.Group controlId="formBasicStatus">
+                                                                        <Form.Label>Status</Form.Label>
+                                                                        <Form.Control as="select" value={filterRole} placeholder="Select Status" onChange={(val) => setStatusFilter(val.target.value)} >
+                                                                            <option value={'none'}> -- Select a Status -- </option>
+                                                                            <option value='Active' > Active </option>
+                                                                            <option value='Inactive' >Inactive</option>
+                                                                        </Form.Control>
+                                                                    </Form.Group>
+                                                                </Col>
+                                                            </Row>
+                                                        
+                                                            <Row>
+                                                                <Col md={6}>
+                                                                    <Form.Group controlId="formBasicActivity">
+                                                                        <Form.Label>Activity</Form.Label>
+                                                                        <Form.Control as="select" value={filterRole} placeholder="Select activity" onChange={(val) => setActivityFilter(val.target.value)} >
+                                                                            <option value={'none'}> -- Select activity -- </option>
+                                                                            <option value={'Past Due Date'}> Past Due Date </option>
+                                                                            <option value={'Pending'}> Pending </option>
+                                                                            <option value={'Completed'}> Completed </option>
+                                                                        </Form.Control>
+                                                                    </Form.Group>
+                                                                </Col>
+                                                            </Row>
 
                                                             <Button variant='success'
                                                                 disabled={stringIsEmpty(ojtName) && stringIsEmpty(assignedTo)}
@@ -279,7 +354,7 @@ const MainOjtPage = props => {
                             {
                                 <span>
                                     {
-                                        allOJTrows.length === 0 ?
+                                        filteredOJTsList.length === 0 ?
                                             <Container style={{ textAlign: 'center', marginTop: '10vh' }}>
                                                 <div> No Records to Show </div>
                                             </Container>
@@ -304,7 +379,7 @@ const MainOjtPage = props => {
                                                     </thead>
                                                     <tbody>
                                                         {
-                                                            allOJTrows.map((row, index) => (
+                                                            filteredOJTsList.map((row, index) => (
                                                                 <tr key={index}>
                                                                     <td> {(paginationState.currentPage * paginationState.nor) + (index + 1)} </td>
                                                                     <td>{row.ojt_name}</td>
