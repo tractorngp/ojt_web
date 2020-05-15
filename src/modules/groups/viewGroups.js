@@ -15,7 +15,7 @@ import ReactPaginate from 'react-paginate';
 const initialPageState = {
   name: null,
   active: false,
-  nor: 8,
+  nor: 10,
   page: 0,
   currentPage: 0
 };
@@ -35,6 +35,7 @@ const ViewGroups = props => {
   const classes = useStyles();
   const db = firebase.firestore();
   const [groups, setGroups] = React.useState([]);
+  const [filteredGroups, setFilteredGroups ] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [open, setOpen] = React.useState(false);
   const { groupState, groupDispatch, selectedTokenState, selectedTokenDispatch } = React.useContext(GroupContext);
@@ -56,6 +57,7 @@ const ViewGroups = props => {
         setGroupsCount(gList.length);
         setGroups(gList);
         setVisibleGroupRows(slicedList);
+        setFilteredGroups(gList);
         setLoading(false);
       }, error => {
         setLoading(false);
@@ -71,7 +73,7 @@ const ViewGroups = props => {
     let initialState = paginationState;
     setPaginationState(paginationState);
     let slicedList = [];
-    slicedList = groups.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+    slicedList = filteredGroups.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
     setVisibleGroupRows(slicedList);
   };
 
@@ -140,8 +142,12 @@ const ViewGroups = props => {
     }
   }
 
-  const saveGroup = _ => {
-    setMaskingText('Updating Group...');
+  const saveGroup = async _ => {
+    if(currentEditingGroup === null){
+      setMaskingText('Creating Group...');
+    }else{
+      setMaskingText('Updating Group...');
+    }
     setBackdrpFlag(true);
     let gMembers = [];
     selectedTokenState.selectedTokenIds.forEach(gm => {
@@ -154,9 +160,13 @@ const ViewGroups = props => {
       active: groupState.active,
       modifiedDate: new Date().toISOString()
     };
-    // TODO - check if group_id is already taken
-    db.collection('groups').doc(String(groupData.group_id))
-      .update(groupData).then(_ => {
+    if(currentEditingGroup === null){
+      const new_group_id = await (db.collection('groups').doc()).id;
+      groupData.group_id = new_group_id;
+      groupData.createdDate = new Date().toISOString();
+      groupData.active = true;
+      db.collection('groups').doc(String(groupData.group_id))
+      .set(groupData).then(_ => {
         setBackdrpFlag(false); setMaskingText('');
         setOpen(false); groupDispatch({ type: 'CLEAR' });
         setSnackbar(true);
@@ -165,12 +175,26 @@ const ViewGroups = props => {
         setOpen(false); alert('Error Uploading Group');
         console.error(error);
       });
+    }else{
+      // TODO - check if group_id is already taken
+      db.collection('groups').doc(String(groupData.group_id))
+        .update(groupData).then(_ => {
+          setBackdrpFlag(false); setMaskingText('');
+          setOpen(false); groupDispatch({ type: 'CLEAR' });
+          setSnackbar(true);
+        }).catch(error => {
+          setBackdrpFlag(false); setMaskingText('');
+          setOpen(false); alert('Error Uploading Group');
+          console.error(error);
+        });
+    }
   };
 
   const filterGroupsWithFields = _ => {
     if(stringIsNotEmpty(filteringGroupName))
     {
-      let filteredList = groups.filter(x => x.name.toLocaleLowerCase().includes(filteringGroupName.toLocaleLowerCase()));
+      let filteredList = groups.filter(x => x.name.toLowerCase().includes(filteringGroupName.toLowerCase()));
+      setFilteredGroups(filteredList);
     setGroupsCount(filteredList.length);
     filteredList = filteredList.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
     setVisibleGroupRows(filteredList);
@@ -180,6 +204,7 @@ const ViewGroups = props => {
 
   const clearFilters = async _ => {
     setFilteringGroupName("");
+    setFilteredGroups(groups);
     setGroupsCount(groups.length);
     let tempList = groups.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
     setVisibleGroupRows(tempList);
@@ -203,7 +228,9 @@ const ViewGroups = props => {
         {/*  Edit group modal  */}
         <Modal size={'xl'} show={open} onHide={handleClose} animation={false}>
           <Modal.Header closeButton>
-            <Modal.Title>Edit Group</Modal.Title>
+            <Modal.Title>
+              { nullChecker(currentEditingGroup) ? 'Edit ' : 'Create ' } Group
+              </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <CreateGroup name={currentEditingGroup !== null ? currentEditingGroup.name : null}
@@ -224,7 +251,13 @@ const ViewGroups = props => {
 
         {/* Filtering Options */}
         <div style={{ marginBottom: '0.7rem', marginTop: '0.7rem', display: 'flex', flexDirection: 'row-reverse' }} >
-          <Button variant="danger" style={{marginLeft: '1rem'}}> <IoMdAdd size={20} /> </Button>
+          <Button
+          onClick={()=>{
+            groupDispatch({ type: 'CLEAR' });
+            setCurrentEditGroup(null);
+            setOpen(true);
+          }}
+          variant="danger" style={{marginLeft: '1rem'}}> <IoMdAdd size={20} /> </Button>
           <OverlayTrigger
             trigger="click"
             key={'bottom'}
@@ -242,11 +275,11 @@ const ViewGroups = props => {
 
                   <Button 
                   disabled={!(filteringGroupName !== null && filteringGroupName !== undefined && filteringGroupName.length > 0)}
-                   variant='success' onClick={filterGroupsWithFields}>
+                   variant='success' onClick={()=>filterGroupsWithFields()}>
                     Submit
                   </Button>
                   &nbsp;&nbsp;
-                  <Button variant='light' onClick={clearFilters}>
+                  <Button variant='light' onClick={()=>clearFilters()}>
                     Clear
                   </Button>
                 </Form>
@@ -310,7 +343,6 @@ const ViewGroups = props => {
                           >
                             <Dropdown.Item
                               onClick={() => {
-                                console.log('hi');
                                 toggleGroupStatus(row.active, row.group_id)
                               }}
                             >Toggle Status</Dropdown.Item>

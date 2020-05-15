@@ -15,6 +15,7 @@ import { initialPageState, createData, verifyUserAlreadyExists, userStyles } fro
 const Users = props => {
   const db = firebase.firestore();
   const [userRows, setUsers] = React.useState([]);
+  const [ filteredUsers, setFilteredUsers ] = React.useState([]);
   const fileRef = React.useRef(null);
   const [loading, setLoading] = React.useState(true);
   const [userModal, setUserModal] = React.useState(false);
@@ -53,6 +54,7 @@ const Users = props => {
         });
         setUsersCount(tempList.length);
         let slicedList = tempList.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+        setFilteredUsers(tempList);
         setUsers(tempList);
         setVisibleUserRows(slicedList);
         setLoading(false);
@@ -68,7 +70,7 @@ const Users = props => {
     paginationState.currentPage = selected;
     setPaginationState(paginationState);
     let slicedList = [];
-    slicedList = userRows.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
+    slicedList = filteredUsers.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
     setVisibleUserRows(slicedList);
   };
 
@@ -156,6 +158,7 @@ const Users = props => {
       }else{
         flevel4 = flevel3;
       }
+      setFilteredUsers(flevel4);
       setUsersCount(flevel4.length);
       flevel4 = flevel4.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
       setVisibleUserRows(flevel4);
@@ -170,6 +173,7 @@ const Users = props => {
     setfUName("");
     setfUToken(""); setRoleFilter("");
     setUsersCount(userRows.length);
+    setFilteredUsers(userRows);
     let tempList = userRows.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
     setVisibleUserRows(tempList);
   }

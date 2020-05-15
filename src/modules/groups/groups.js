@@ -76,7 +76,6 @@ const groupsReducer = (state, action) => {
 };
 
 export const Groups = props => {
-    const classes = useStyles();
     const [groupState, groupDispatch] = React.useReducer(groupsReducer, initialState);
     const [selectedTokenState, selectedTokenDispatch] = React.useReducer(selectedTokensReducer, selectedTokenInitialState);
     const [open, setOpen] = React.useState(false);
@@ -141,15 +140,13 @@ export const Groups = props => {
                             Cancel
                         </Button> &nbsp;
                         <Button variant='success'
-                            disabled={!(nullChecker(groupState.name) && new String(groupState.name).length > 0
+                            disabled={!(nullChecker(groupState.name) && groupState.name.length > 0
                                 && listEmptyChecker(selectedTokenState.selectedTokenIds))}
                             onClick={createGroup}
                         >Submit</Button>
                     </Modal.Footer>
                 </Modal>
                 <Container fluid>
-                    <Button onClick={() => setOpen(true)} variant={'danger'} > + Create Group </Button>
-                    <br /> <br />
                     <ViewGroups state={state} />
                 </Container>
             </div>
