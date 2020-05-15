@@ -247,17 +247,17 @@ export const PendingOJTs = props => {
                 <Form>
                   <Form.Group controlId="formBasicOJTName">
                     <Form.Label>OJT Name</Form.Label>
-                    <Form.Control type="text" placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)}/>
+                    <Form.Control size={'sm'} type="text" placeholder="Enter OJT Name" onChange={(val) => setOjtName(val.target.value)}/>
                   </Form.Group>
 
                   <Form.Group controlId="formBasicAssignedTo">
                     <Form.Label>Assigned To</Form.Label>
-                    <Form.Control type="text" placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)}/>
+                    <Form.Control size={'sm'} type="text" placeholder="Enter Assigned To" onChange={(val) => setAssignedTo(val.target.value)}/>
                   </Form.Group>
 
                   <Form.Group controlId="formBasicDueDate">
                     <Form.Label>Due Date (before)</Form.Label>
-                    <FormControl
+                    <FormControl size={'lg'} 
                       value={nullChecker(dueDate) ? dueDate.toISOString().substr(0, 10) : ''}
                       type={'date'}
                       placeholder={'Due Date'}

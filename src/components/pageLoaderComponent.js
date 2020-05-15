@@ -18,7 +18,7 @@ export const PageLoaderComponent = ({ maskingText }) => {
       <Container style={{ width: '20%' }}>
         <Row>
           <Col md={3} style={{ textAlign: 'left' }}>
-            <Spinner name="line-scale-pulse-out-rapid" fadeIn={'none'} color={'#d9534f'}>
+            <Spinner name="line-scale-pulse-out-rapid" style={{width: '200%'}} fadeIn={'none'} color={'#d9534f'}>
             </Spinner>
           </Col>
           <Col md={9} style={{ textAlign: 'left' }}>

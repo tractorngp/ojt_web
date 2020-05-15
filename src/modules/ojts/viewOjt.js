@@ -30,7 +30,34 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const ViewOjt = props => {
+const ojtInitialState ={
+    fromCreate: true,
+    editingOJT: {},
+    ojtOpen: false
+}
+
+export const OjtContext = React.createContext();
+
+const ojtReducer = (state,action) => {
+  switch(action.type){
+    case 'ALL':
+      return {
+          editingOJT: action.editingOJT,
+          fromCreate: action.fromCreate,
+          ojtOpen: action.ojtOpen
+      }
+      case 'OPEN_OJT':
+        return{
+          ...state,
+          ojtOpen: action.ojtOpen
+        }
+      default:
+        return state;
+  }
+
+};
+
+export const ViewOjt = props => {
     const classes = useStyles();
     const [ojtTemplates, setOjtTemplates] = React.useState([]);
     const db = firebase.firestore();
@@ -42,7 +69,7 @@ const ViewOjt = props => {
     const [openSnackbar, setSnackbar] = React.useState(false);
     const [snackBarText, setsbarText] = React.useState('');
     const [ loading, setLoading ] = React.useState(true);
-    const [ ojtOpen, setOjtOpen ] = React.useState(false);
+    const [ ojtState, ojtStateDispatch ] = React.useReducer(ojtReducer,ojtInitialState);
 
     const fetchOjts = _ => {
         setLoading(true);
@@ -62,10 +89,6 @@ const ViewOjt = props => {
         setSelectedOJT(null);
         assignToGroupsDispatch([]);
     };
-
-    const handleOJTClose = _ => {
-        setOjtOpen(false);
-    }
 
     const handleOpen = ojt_id => {
         setSelectedOJT(ojt_id);
@@ -106,11 +129,28 @@ const ViewOjt = props => {
         });
     };
 
+    const openInEditMode = templateItem => {
+        ojtStateDispatch({
+            type: 'ALL',
+            fromCreate: false,
+            ojtOpen: true,
+            editingOJT: templateItem
+        });
+    }
+
+    const toggleOJTModal = val => {
+        ojtStateDispatch({
+            type: 'OPEN_OJT',
+            ojtOpen: val
+        });
+    }
+
     React.useEffect(_ => {
         fetchOjts();
     }, []);
 
     return (
+        <OjtContext.Provider value={{ ojtState, ojtStateDispatch }}>
         <Container className={classes.viewOjtContainer} fluid>
             <BackDropComponent maskingText={maskingText} showBackdrop={showBackdrop} />
             <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setSnackbar(false)}>
@@ -137,11 +177,18 @@ const ViewOjt = props => {
             </Modal>
 
             {/* Create OJT Modal */}
-            <CreateOJTNew ojtOpen={ojtOpen} ojtDispatch={setOjtOpen} editMode={true} fromCreate={true}  />
+            <Modal size={'lg'} show={ojtState.ojtOpen} onHide={()=>toggleOJTModal(false)} animation={false}>
+            <CreateOJTNew ojtState={ojtState}  />
+            </Modal>
             
                 <div style={{ display:'flex', flexDirection: 'row-reverse', width:'100%', marginTop:'1.0vh', marginBottom: '1.0vh' }}>
                     <Button variant="danger" style={{width:'10%'}} onClick={()=> {
-                        setOjtOpen(true)
+                        ojtStateDispatch({
+                            type:'ALL',
+                            fromCreate: true,
+                            editingOJT: {},
+                            ojtOpen: true
+                        });
                     }}><IoMdAdd size={25} /></Button></div>
                 {
                     loading === true ?
@@ -168,6 +215,7 @@ const ViewOjt = props => {
                                         <Col md={6} xs={6} xl={6} lg={6}>
                                             <Tooltip title="OJT Info">
                                                 <Button variant={'light'} 
+                                                onClick={()=>openInEditMode(templateItem)}
                                                 >
                                                     <IoMdInformationCircleOutline />
                                                 </Button>
@@ -190,8 +238,7 @@ const ViewOjt = props => {
                     </span>
                 }
         </Container>
+        </OjtContext.Provider>
     );
 
 };
-
-export default ViewOjt;

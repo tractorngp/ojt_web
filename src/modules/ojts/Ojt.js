@@ -1,5 +1,5 @@
 import React from 'react';
-import ViewOjt from './viewOjt';
+import {ViewOjt} from './viewOjt';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { UserContext } from '../../App';
@@ -305,7 +305,7 @@ const MainOjtPage = props => {
                                                     <tbody>
                                                         {
                                                             allOJTrows.map((row, index) => (
-                                                                <tr>
+                                                                <tr key={index}>
                                                                     <td> {(paginationState.currentPage * paginationState.nor) + (index + 1)} </td>
                                                                     <td>{row.ojt_name}</td>
                                                                     <td>{row.assigned_to_name != null ? row.assigned_to_name : ""}</td>
