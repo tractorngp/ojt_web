@@ -48,6 +48,7 @@ const MainOjtPage = props => {
     const [ojtName, setOjtName] = React.useState([]);
     const [assignedTo, setAssignedTo] = React.useState([]);
     const [dueDate, setDueDate] = React.useState(new Date());
+    const [ojtList, setOJTsList] = React.useState([]);
     const [filteredOJTsList, setFilteredOJTsList] = React.useState([]);
     const [all_ojts_full, setAssignedOJTs] = React.useState([]);
     const [open, setOpen] = React.useState(false);
@@ -88,7 +89,7 @@ const MainOjtPage = props => {
         let initialState = paginationState;
         setPaginationState(paginationState);
         let slicedList = [];
-        slicedList = filteredOJTsList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
+        slicedList = ojtList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
         setFilteredOJTsList(slicedList);
         console.log("Load new pages")
 
@@ -101,9 +102,9 @@ const MainOjtPage = props => {
         let tempList3 = [];
         let tempList4 = [];
         let tempList5 = [];
-        if (filteredOJTsList != null && filteredOJTsList.length > 0) {
+        if (ojtList != null && ojtList.length > 0) {
             if (ojtName != null && ojtName.trim() !== "") {
-                tempList1 = await filteredOJTsList.filter(rec => {
+                tempList1 = ojtList.filter(rec => {
                     if (rec['ojt_name'].toLowerCase().includes(ojtName.toLowerCase())) {
                         return rec;
                     }
@@ -114,7 +115,7 @@ const MainOjtPage = props => {
             }
 
             if (assignedTo != null && assignedTo.trim() !== "") {
-                tempList2 = await tempList1.filter(rec => {
+                tempList2 = tempList1.filter(rec => {
                     if (rec['assigned_to_name'].toLowerCase().includes(assignedTo.toLowerCase())) {
                         return rec;
                     }
@@ -125,7 +126,7 @@ const MainOjtPage = props => {
             }
 
             if (dueDate != null && dueDate !== "") {
-                tempList3 = await tempList2.filter(rec => {
+                tempList3 = tempList2.filter(rec => {
                     let d1 = new Date(rec['due_date']);
                     let d2 = new Date(dueDate);
                     d1.setHours(0, 0, 0, 0);
@@ -139,8 +140,8 @@ const MainOjtPage = props => {
                 tempList3 = tempList2;
             }
 
-            if(filterStatus != null && filterStatus.trim() !== ""){
-                tempList4 = await tempList3.filter(rec => {
+            if(filterStatus != null && filterStatus.trim() !== "" && filterStatus.trim() !== 'none'){
+                tempList4 = tempList3.filter(rec => {
                     if(filterStatus == "Active")
                     return rec.active
                     else
@@ -151,8 +152,8 @@ const MainOjtPage = props => {
                 tempList4 = tempList3
             }
 
-            if(filterActivity != null && filterActivity.trim() !== ""){
-                tempList5 = await tempList4.filter(rec => {
+            if(filterActivity != null && filterActivity.trim() !== "" && filterActivity.trim() !== "none"){
+                tempList5 = tempList4.filter(rec => {
                     if(filterActivity == "Completed"){
                         return (rec.status == "completed")
                     }
@@ -177,10 +178,12 @@ const MainOjtPage = props => {
             }
 
             setTotalCount(tempList5.length);
+            setOJTsList(all_ojts_full)
 
             tempList5 = tempList5.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
 
             setFilteredOJTsList(tempList5)
+            
         }
         else {
             console.log("No results to return");
@@ -191,9 +194,12 @@ const MainOjtPage = props => {
     const clearFilters = async _ => {
         setOjtName("");
         setAssignedTo("");
+        paginationState.currentPage = 0;
         setDueDate(new Date());
         let tempList = all_ojts_full.slice((paginationState.currentPage * paginationState.nor), ((paginationState.currentPage * paginationState.nor) + paginationState.nor));
         setFilteredOJTsList(tempList);
+        setOJTsList(all_ojts_full);
+        setTotalCount(nullChecker(all_ojts_full) ? all_ojts_full.length : 0);
     }
 
     const getAllOJTs = async _ => {
@@ -221,6 +227,7 @@ const MainOjtPage = props => {
                             let initialState = paginationState;
                             let slicedList = tempList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
                             setAssignedOJTs(tempList);
+                            setOJTsList(tempList);
                             setFilteredOJTsList(slicedList);
                             setLoading(false);
                         }
@@ -330,7 +337,6 @@ const MainOjtPage = props => {
                                                             </Row>
 
                                                             <Button variant='success'
-                                                                disabled={stringIsEmpty(ojtName) && stringIsEmpty(assignedTo)}
                                                                 onClick={() => filterOJTsWithFields()}>
                                                                 Submit
                                     </Button>       &nbsp;
