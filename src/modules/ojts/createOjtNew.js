@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Modal, FormControl, Button, Row, Col, ListGroup, Form, Alert } from 'react-bootstrap';
+import { Container, Modal, FormControl, Button, Row, Col, ListGroup, Alert } from 'react-bootstrap';
 import { IoIosCreate, IoMdTrash, IoMdCloudUpload, IoMdRemoveCircleOutline, IoMdAdd } from 'react-icons/io';
 import { nullChecker } from '../../utils/commonUtils';
 import { Checkbox, Snackbar } from '@material-ui/core';
@@ -52,7 +52,7 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
 
     const validateTheQuestions = _ => {
         let validationPass = true;
-        if(ojtName == null || ojtName.trim() == ""){
+        if(ojtName === null || ojtName.trim() === ""){
             validationPass = false;
             showSnackBar("OJT Name can't be empty!", "danger");
             return;
@@ -65,32 +65,32 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
             }
             else{
                 for(let index = 0; index < Questions.length; index++){
-                    if(Questions[index].question_text == null || Questions[index].question_text.trim() == ""){
+                    if(Questions[index].question_text === null || Questions[index].question_text.trim() === ""){
                         validationPass = false;
                         showSnackBar(`Question ${index+1} text can't be empty!`, "danger");
                         return;
                     }
-                    if(Questions[index].options == null || Questions[index].options.length <= 1){
+                    if(Questions[index].options === null || Questions[index].options.length <= 1){
                         validationPass = false;
                         showSnackBar("You need to add atleast 2 options!", "danger");
                         return;
                     }
                     if(Questions[index].options != null || Questions[index].options.length > 1){
                         for(let aindex = 0;aindex<Questions[index].options.length;aindex++){
-                            if(Questions[index].options[aindex] == null || Questions[index].options[aindex].trim() == ""){
+                            if(Questions[index].options[aindex] === null || Questions[index].options[aindex].trim() === ""){
                                 validationPass = false;
                                 showSnackBar(`Option ${aindex+1} text can't be empty!`, "danger");
                                 return;
                             }
                         }
                     }
-                    if(Questions[index].correct_answers == null || Questions[index].correct_answers.length == 0){
+                    if(Questions[index].correct_answers === null || Questions[index].correct_answers.length === 0){
                         validationPass = false;
                         showSnackBar("You need to add atleast 1 correct answer!", "danger");
                         return;
                     }
                 }
-                if(validationPass == true)
+                if(validationPass === true)
                 showSnackBar("Good to go!", "success");
             }
         }
@@ -218,7 +218,7 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
                                     <ListGroup.Item>
                                         <Row>
                                             <Col md={4}>
-                                                <img height={50} width={50} src={URL.createObjectURL(file)}  onClick={()=>setLightBoxState(true)}/>
+                                                <img height={50} width={50} src={URL.createObjectURL(file)} alt={'Attached File'} onClick={()=>setLightBoxState(true)}/>
                                             </Col>
                                             <Col md={4}>
                                                 <p>{file.name}</p>
@@ -350,7 +350,7 @@ const CreateOJTNew = ({ ojtOpen, ojtDispatch, editMode, fromCreate }) => {
                                                         style={{display: (!editState ? 'none' : 'inline-block')}} variant={'danger'}> <IoMdTrash /> </Button>
                                                     </Col>
                                                 </Row>
-                                            )) : (editMode === true ? 'Add Answers' : 'No Answers')
+                                            )) : ((editMode === true) ? 'Add Answers' : 'No Answers')
                                     }
                                     <br />
                                 </form>

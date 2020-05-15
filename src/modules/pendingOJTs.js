@@ -1,11 +1,10 @@
 import React from 'react';
 import { UserContext } from '../App';
-import {  Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip, FormControlLabel } from '@material-ui/core';
+import { makeStyles, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { nullChecker, listEmptyChecker } from '../utils/commonUtils';
-import { ListGroup, Row, Col, FormGroup, Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup } from 'react-bootstrap';
-import Spinner from 'react-spinkit';
+import { nullChecker } from '../utils/commonUtils';
+import { Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover } from 'react-bootstrap';
 import ReactPaginate from 'react-paginate';
 import '../App.css';
 import '../assets/styles/bootstrap.min.css';
@@ -198,7 +197,7 @@ export const PendingOJTs = props => {
             docData.group_name = (res2.data() != null ? res2.data().name : "");
             tempList.push(createData(docData.active, docData.assigned_to, docData.group_id, docData.images, docData.no_of_attempts, docData.ojt_name, docData.questions, docData.record_id, docData.status, docData.assigned_date, docData.due_date, docData.q_type, docData.group_name, docData.assigned_to_name));
             i++;
-            if (i == assigned_ojts.length) {
+            if (i === assigned_ojts.length) {
               let initialState = paginationState;
               let slicedList = tempList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
               setAssignedOJTs(tempList);

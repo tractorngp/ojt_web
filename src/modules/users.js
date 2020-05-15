@@ -1,9 +1,9 @@
 import React from 'react';
-import { TableContainer, makeStyles, Typography, CardContent, Snackbar } from '@material-ui/core';
+import { TableContainer, Typography, CardContent, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import * as XLSX from 'xlsx';
-import { IoMdPersonAdd, IoMdSettings, IoMdSearch, IoMdTrash } from 'react-icons/io';
+import { IoMdPersonAdd, IoMdSettings, IoMdTrash } from 'react-icons/io';
 import { useForm } from 'react-hook-form';
 import { Row, Col, Form, Button, Modal, FormControl, Container, Table, DropdownButton, Dropdown, Alert, Popover, OverlayTrigger } from 'react-bootstrap';
 import { PageLoaderComponent, BackDropComponent } from '../components/pageLoaderComponent';
@@ -11,8 +11,6 @@ import { MdMoreVert } from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
 import { nullChecker, listEmptyChecker, stringIsEmpty, stringIsNotEmpty } from '../utils/commonUtils';
 import { initialPageState, createData, verifyUserAlreadyExists, userStyles } from '../utils/userUtils';
-
-const ROLES = ['USER', 'ADMIN'];
 
 const Users = props => {
   const db = firebase.firestore();
@@ -336,7 +334,7 @@ const Users = props => {
             <Form.Control as={'select'} placeholder={'Select a Role'} name="role"
               ref={register({
                 required: 'Required',
-                validate: value => value !== null && value !== 'none' || 'Please choose a role'
+                validate: value => (value !== null && value !== 'none') || 'Please choose a role'
               })}
             >
               <option value={'none'} selected disabled hidden> Select a Role </option>
@@ -408,7 +406,7 @@ const Users = props => {
                 defaultValue={nullChecker(userInfo) ? userInfo.role : ''}
                 ref={register({
                   required: 'Required',
-                  validate: value => value !== null && value !== 'none' || 'Please choose a role'
+                  validate: value => (value !== null && value !== 'none') || 'Please choose a role'
                 })}
               >
                 <option value={'none'} selected disabled hidden> Select a Role </option>
@@ -504,7 +502,7 @@ const Users = props => {
         <Col md={4}>
         </Col>
         <Col md={4}>
-          <Button onClick={triggerFile} variant="contained" variant={'danger'}>Upload Users From Excel</Button>
+          <Button onClick={triggerFile}variant={'danger'}>Upload Users From Excel</Button>
           <input ref={fileRef}
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />

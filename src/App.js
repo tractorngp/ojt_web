@@ -5,7 +5,6 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import AdminDashboard from './home/adminDashboard';
 import Login from './auth/login';
-import { CircularProgress } from '@material-ui/core';
 import { getStorageItem } from './utils/sessionStorageService';
 import {PageLoaderComponent} from './components/pageLoaderComponent';
 

@@ -3,14 +3,13 @@ import ViewOjt from './viewOjt';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { UserContext } from '../../App';
-import { nullChecker, listEmptyChecker, stringIsNotEmpty, stringIsEmpty } from '../../utils/commonUtils';
-import { Paper, TableContainer, makeStyles, CircularProgress, Switch, Modal, Typography, Card, CardContent, Snackbar, Backdrop, Tooltip, FormControlLabel } from '@material-ui/core';
-import { ListGroup, Row, Col, FormGroup, Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, InputGroup, Alert } from 'react-bootstrap';
-import Spinner from 'react-spinkit';
+import { nullChecker, stringIsEmpty } from '../../utils/commonUtils';
+import { makeStyles, Snackbar } from '@material-ui/core';
+import {  Row, Col, Form, Table, Button, Container, FormControl, DropdownButton, Dropdown, Badge, OverlayTrigger, Popover, Alert } from 'react-bootstrap';
 import ReactPaginate from 'react-paginate';
 import '../../assets/styles/bootstrap.min.css';
 import { PageLoaderComponent, BackDropComponent } from '../../components/pageLoaderComponent';
-import { IoMdSettings, IoMdCheckmark, IoMdAdd, IoMdSearch, IoIosSearch } from 'react-icons/io';
+import { IoMdSettings, IoMdCheckmark } from 'react-icons/io';
 import { MdMoreVert } from 'react-icons/md';
 import * as moment from 'moment';
 
@@ -97,7 +96,7 @@ const MainOjtPage = props => {
         let tempList3 = [];
 
         if (all_ojts_full != null && all_ojts_full.length > 0) {
-            if (ojtName != null && ojtName.trim() != "") {
+            if (ojtName != null && ojtName.trim() !== "") {
                 tempList1 = await all_ojts_full.filter(rec => {
                     if (rec['ojt_name'].toLowerCase().includes(ojtName.toLowerCase())) {
                         return rec;
@@ -108,7 +107,7 @@ const MainOjtPage = props => {
                 tempList1 = all_ojts_full;
             }
 
-            if (assignedTo != null && assignedTo.trim() != "") {
+            if (assignedTo != null && assignedTo.trim() !== "") {
                 tempList2 = await tempList1.filter(rec => {
                     if (rec['assigned_to_name'].toLowerCase().includes(assignedTo.toLowerCase())) {
                         return rec;
@@ -119,7 +118,7 @@ const MainOjtPage = props => {
                 tempList2 = tempList1;
             }
 
-            if (dueDate != null && dueDate != "") {
+            if (dueDate != null && dueDate !== "") {
                 tempList3 = await tempList2.filter(rec => {
                     let d1 = new Date(rec['due_date']);
                     let d2 = new Date(dueDate);
@@ -156,7 +155,6 @@ const MainOjtPage = props => {
 
     const getAllOJTs = async _ => {
         setLoading(true);
-        var ref = state.tokenId;
         db.collection('assigned_ojts')
             .orderBy('group_id', 'asc')
             // .limit(initialState.nor)
@@ -176,7 +174,7 @@ const MainOjtPage = props => {
                         docData.group_name = (res2.data() != null ? res2.data().name : "");
                         tempList.push(createData(docData.active, docData.assigned_to, docData.group_id, docData.images, docData.no_of_attempts, docData.ojt_name, docData.questions, docData.record_id, docData.status, docData.assigned_date, docData.due_date, docData.q_type, docData.group_name, docData.assigned_to_name));
                         i++;
-                        if (i == all_ojts.length) {
+                        if (i === all_ojts.length) {
                             let initialState = paginationState;
                             let slicedList = tempList.slice((initialState.currentPage * initialState.nor), ((initialState.currentPage * initialState.nor) + initialState.nor));
                             setAssignedOJTs(tempList);
@@ -317,7 +315,7 @@ const MainOjtPage = props => {
                                                                             {row.active === true ? 'Active' : 'Inactive'}</Badge>
                                                                     </td>
                                                                     <td>
-                                                                        {row.status == "completed" ?
+                                                                        {row.status === "completed" ?
                                                                             <Badge variant={new Date().getTime() < new Date(row.due_date).getTime() ? 'info' : 'success'}>
                                                                                 {'Completed'}
                                                                             </Badge>

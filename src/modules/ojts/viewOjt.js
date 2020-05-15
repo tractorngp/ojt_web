@@ -2,10 +2,10 @@ import React from 'react';
 import { Container, ListGroup, Row, Col, Button, Badge, Modal, Alert } from 'react-bootstrap';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { CircularProgress, Tooltip, makeStyles, Snackbar } from '@material-ui/core';
+import { Tooltip, makeStyles, Snackbar } from '@material-ui/core';
 import { IoMdInformationCircleOutline, IoMdPeople, IoMdAdd } from 'react-icons/io';
 import AssignOJT from './assignOjt';
-import { BackDropComponent, PageLoaderComponent } from '../../components/pageLoaderComponent';
+import { BackDropComponent } from '../../components/pageLoaderComponent';
 import CreateOJTNew from './createOjtNew';
 import Spinner from 'react-spinkit';
 
