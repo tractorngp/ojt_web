@@ -242,8 +242,8 @@ const CreateOJTNew = props => {
         let tempList = [...filesList];
         let fileSizeExceeded = false;
         for (let i = 0; i < fileList.length; i++) {
-            if((fileList.item(i).size > (1024 * 2) * 8) || 
-            (fileList.item(i).type !== 'images/jpeg' || fileList.item(i).type !== 'images/png')){
+            if((fileList.item(i).size > ((1024 * 2) * 1024)) || 
+            (fileList.item(i).type !== 'image/jpeg' && fileList.item(i).type !== 'image/png')){
                 fileSizeExceeded = true;
             }else{
             tempList.push(fileList.item(i));
