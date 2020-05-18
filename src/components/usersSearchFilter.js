@@ -5,7 +5,7 @@ import { FormControl, InputGroup } from 'react-bootstrap';
 
 const useStyles = makeStyles(theme => ({
     filterList: {
-        maxHeight: '20vh',
+        // maxHeight: '20.0vh',
         overflowY: 'auto',
         overflowX: "hidden",
         listStyle: 'none'
@@ -72,32 +72,31 @@ const UsersSearchFilter = ({ users, roles, selectedIds }) => {
     }, []);
 
     return (
-        <Container>
+        <Container style={{height: '100%'}}>
             <InputGroup size="sm" className="mb-3">
                 <InputGroup.Prepend>
-                    <InputGroup.Text id="inputGroup-sizing-sm">Admin</InputGroup.Text>
+                    <InputGroup.Text id="inputGroup-sizing-sm">Users</InputGroup.Text>
                 </InputGroup.Prepend>
                 <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm"
                     type={'search'}
-                    onChange={(val) => { setSearchAdminText(val.target.value) }} placeholder={'Admin Search Filter...'}
+                    onChange={(val) => { setSearchAdminText(val.target.value) }} placeholder={'Users Search Filter...'}
                 />
             </InputGroup>
-            <ul className={classes.filterList}>
+            <ul className={classes.filterList} style={{height: '55vh', margin: '0'}}>
                 {
                     usersList.filter(x => {
-                        return x.role === 'admin' &&
-                            (searchAdminText !== null && searchAdminText !== '' ?
+                        return  (searchAdminText !== null && searchAdminText !== '' ?
                                 x.user.name.toLocaleLowerCase().includes(String(searchAdminText).toLocaleLowerCase()) || String(x.user.tokenId).includes(String(searchAdminText).toLocaleLowerCase())
                                 : true);
                     }).map(user => (
                         <li key={user.user.tokenId} style={{ textAlign: 'left' }}> <p> <Checkbox
                             color={'primary'}
                             onChange={(val) => editSelectedList(val, user.user.tokenId)}
-                            defaultChecked={user.selected} /> {user.user.tokenId} - {user.user.name}  </p>  </li>
+                            defaultChecked={user.selected} /> {user.user.tokenId} - {user.user.name} ({user.user.role.toUpperCase()}) </p>  </li>
                     ))
                 }
             </ul>
-            <hr />
+            {/* <hr />
             <InputGroup size="sm" className="mb-3">
                 <InputGroup.Prepend>
                     <InputGroup.Text id="inputGroup-sizing-sm">Users</InputGroup.Text>
@@ -120,7 +119,7 @@ const UsersSearchFilter = ({ users, roles, selectedIds }) => {
                             defaultChecked={user.selected} />  {user.user.tokenId} - {user.user.name}  </p>  </li>
                     ))
                 }
-            </ul>
+            </ul> */}
         </Container>
     )
 
