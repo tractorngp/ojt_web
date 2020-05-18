@@ -572,7 +572,7 @@ const Users = props => {
                 :
                 <div id="users-div">
                   <TableContainer component={'span'}>
-                    <Table striped bordered hover size="sm">
+                    <Table bordered hover size="sm">
                       <thead>
                         <tr>
                           <th> # </th>
