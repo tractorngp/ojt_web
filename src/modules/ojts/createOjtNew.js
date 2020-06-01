@@ -469,7 +469,7 @@ const CreateOJTNew = props => {
                                         <Row>
                                             <Col md={10}>
                                                 <FormControl placeholder={`Question ${index + 1}`}
-                                                    maxLength={50}
+                                                    maxLength={100}
                                                     onChange={
                                                         (val) => {
                                                             let questions = _.cloneDeep(Questions);

@@ -452,10 +452,10 @@ const Users = props => {
       <Modal size={'lg'} show={showDeletePrompt} onHide={closeDeletePrompt}>
         <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
         <Modal.Header closeButton>
-          <Modal.Title>Are you sure you want to Delete User - {userToDelete}</Modal.Title>
+          <Modal.Title>Are you sure you want to Delete User - {userToDelete}.</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>This would delete the user, their assigned OJTs and involved groups.</p>
+          <p>This would delete the user, their assigned OJTs and involved groups. Deleting user will take a couple of minutes to reflect in the dashboard.</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant={'light'} onClick={closeDeletePrompt}>
