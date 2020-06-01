@@ -523,7 +523,7 @@ const CreateOJTNew = props => {
                                                         </Col>
                                                         <Col md={7}>
                                                             <FormControl
-                                                                maxLength={50}
+                                                                maxLength={100}
                                                                 disabled={!editState}
                                                                 onChange={
                                                                     (val) => {
