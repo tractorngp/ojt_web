@@ -2,6 +2,7 @@ import React from 'react';
 import { TableContainer, Typography, CardContent, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/functions';
 import * as XLSX from 'xlsx';
 import { IoMdPersonAdd, IoMdSettings, IoMdTrash } from 'react-icons/io';
 import { useForm } from 'react-hook-form';
