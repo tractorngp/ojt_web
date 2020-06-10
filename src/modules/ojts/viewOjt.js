@@ -151,7 +151,7 @@ export const ViewOjt = props => {
 
     return (
         <OjtContext.Provider value={{ ojtState, ojtStateDispatch }}>
-        <Container className={classes.viewOjtContainer} fluid>
+        <Container className={classes.viewOjtContainer} fluid style={{overflow: 'hidden', height: '100%'}}>
             <BackDropComponent maskingText={maskingText} showBackdrop={showBackdrop} />
             <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setSnackbar(false)}>
             <Alert variant={'success'} onClose={() => setSnackbar(false)} dismissible>
@@ -196,41 +196,43 @@ export const ViewOjt = props => {
                     </Spinner> <p> Fetching OJT Templates... </p></span>
                     :
                     <span>
-{ 
-                ojtTemplates.length > 0 ?
-                <ListGroup>
-                        <ListGroup.Item style={{fontSize:'1.2rem', fontWeight: '700', color: '#d9534f', background:'#eeeeee'}}> ALL OJT Templates </ListGroup.Item>
-                        {
-                            ojtTemplates.map(templateItem => (
-                                <ListGroup.Item key={templateItem.ojt_name}>
-                                    <Row>
-                                        <Col md={6} xs={6} xl={6} lg={6}>
-                                            <b> {templateItem.ojt_name} &nbsp; <br />
-                                                <Badge variant={'info'}> {'Media: ' + templateItem.images.length}
-                                                </Badge> &nbsp;
-                                <Badge variant={'info'}> {'Questions: ' + templateItem.questions.length}
-                                                </Badge>
-                                            </b>
-                                        </Col>
-                                        <Col md={6} xs={6} xl={6} lg={6}>
-                                            <Tooltip title="OJT Info">
-                                                <Button variant={'light'} 
-                                                onClick={()=>openInEditMode(templateItem)}
-                                                >
-                                                    <IoMdInformationCircleOutline />
-                                                </Button>
-                                            </Tooltip>
-                                    &nbsp;
-                                    <Button
-                                                onClick={() => handleOpen(templateItem.record_id)}
-                                                variant={'outline-info'} > <IoMdPeople /> Assign</Button>
+                { 
+                    ojtTemplates.length > 0 ?
+                    <div style={{ height: '100%'}}>
+                        <div style={{fontSize:'1.24rem', fontWeight: '700', color: '#d9534f', background:'#eeeeee', padding:'0.5rem'}}> <b className="list-group-item-heading" > ALL OJT Templates </b> </div>
+                        <ListGroup style={{overflow: 'scroll', height: '80%', paddingBottom:'2.0vh', overflowX: 'hidden', overflowY: 'scroll'}}>
+                                {
+                                    ojtTemplates.map(templateItem => (
+                                        <ListGroup.Item key={templateItem.ojt_name}>
+                                            <Row>
+                                                <Col md={6} xs={6} xl={6} lg={6}>
+                                                    <b> {templateItem.ojt_name} &nbsp; <br />
+                                                        <Badge variant={'info'}> {'Media: ' + templateItem.images.length}
+                                                        </Badge> &nbsp;
+                                        <Badge variant={'info'}> {'Questions: ' + templateItem.questions.length}
+                                                        </Badge>
+                                                    </b>
+                                                </Col>
+                                                <Col md={6} xs={6} xl={6} lg={6}>
+                                                    <Tooltip title="OJT Info">
+                                                        <Button variant={'light'} 
+                                                        onClick={()=>openInEditMode(templateItem)}
+                                                        >
+                                                            <IoMdInformationCircleOutline />
+                                                        </Button>
+                                                    </Tooltip>
+                                            &nbsp;
+                                            <Button
+                                                        onClick={() => handleOpen(templateItem.record_id)}
+                                                        variant={'outline-info'} > <IoMdPeople /> Assign</Button>
 
 
-                                        </Col>
-                                    </Row>
-                                </ListGroup.Item>
-                            ))}
-                    </ListGroup>
+                                                </Col>
+                                            </Row>
+                                        </ListGroup.Item>
+                                    ))}
+                            </ListGroup>
+                        </div>
                  : <div id="no-records-box">
                         <span> No Record to Show </span>
                     </div>

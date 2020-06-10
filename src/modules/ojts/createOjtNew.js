@@ -18,29 +18,6 @@ const customStyles = {
 };
 
 const sampleQuestions = [];
-// {
-//     "question_text": "Question 1",
-//     "options": [
-//         "Answer 1",
-//         "Answer 2",
-//         "Answer 3"
-//     ],
-//     "correct_answers": [
-//         "Answer 1",
-//         "Answer 2"
-//     ]
-// }, {
-//     "question_text": "Question 2",
-//     "options": [
-//         "Answer 11",
-//         "Answer 12",
-//         "Answer 13"
-//     ],
-//     "correct_answers": [
-//         "Answer 11",
-//         "Answer 12"
-//     ]
-// }
 
 const CreateOJTNew = props => {
     const { ojtState, ojtStateDispatch } = React.useContext(OjtContext);
@@ -389,11 +366,12 @@ const CreateOJTNew = props => {
                             filesList.length > 0 ? <ListGroup style={{ paddingBottom: '2.0vh' }}>
                                 <ListGroup.Item color={'#d9534f'}> Media (Click on image to enlarge) </ListGroup.Item>
                                 {
-                                    filesList.map(file => (
+                                    filesList.map((file, index) => (
                                         <ListGroup.Item>
                                             <Row>
                                                 <Col md={4}>
                                                     <img height={50} width={50} alt={'Attached File'} src={URL.createObjectURL(file)} onClick={() => {
+                                                        setPhotoIndex(index)
                                                         setFromExistingFiles(false)
                                                         setLightBoxFiles(filesList)
                                                         setLightBoxState(true)
@@ -427,11 +405,12 @@ const CreateOJTNew = props => {
                                     </Row>
                                     <ListGroup.Item color={'#d9534f'}> Media (Click on image to enlarge) </ListGroup.Item>
                                     {
-                                        existingFiles.map(file => (
+                                        existingFiles.map((file, index) => (
                                             <ListGroup.Item>
                                                 <Row>
                                                     <Col md={4}>
                                                         <img height={50} width={50} alt={'Attached File'} src={file} onClick={() => {
+                                                            setPhotoIndex(index)
                                                             setFromExistingFiles(true)
                                                             setLightBoxFiles(existingFiles)
                                                             setLightBoxState(true)
@@ -490,7 +469,7 @@ const CreateOJTNew = props => {
                                         <Row>
                                             <Col md={10}>
                                                 <FormControl placeholder={`Question ${index + 1}`}
-                                                    maxLength={50}
+                                                    maxLength={100}
                                                     onChange={
                                                         (val) => {
                                                             let questions = _.cloneDeep(Questions);
@@ -544,7 +523,7 @@ const CreateOJTNew = props => {
                                                         </Col>
                                                         <Col md={7}>
                                                             <FormControl
-                                                                maxLength={50}
+                                                                maxLength={100}
                                                                 disabled={!editState}
                                                                 onChange={
                                                                     (val) => {

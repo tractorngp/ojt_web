@@ -269,10 +269,9 @@ const MainOjtPage = props => {
 
                             <div style={{ marginBottom: '1.0vh', marginRight: '0.0vh', marginTop: '1.0vh' }} >
                                 <Row>
-                                    <Col md={4} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'left', fontSize: '1.2rem' }}>
+                                    <Col md={10} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', fontSize: '1.24rem', fontWeight: 'bold' }}>
                                         <b style={{ color: '#d9534f' }}>Assigned OJTs</b>
                                     </Col>
-                                    <Col md={6}></Col>
                                     <Col md={2} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                         <OverlayTrigger
                                             trigger="click"
@@ -366,7 +365,7 @@ const MainOjtPage = props => {
                                             </Container>
                                             :
                                             <div id="pending-ojts-div">
-                                                <Table striped bordered hover size="sm">
+                                                <Table bordered hover size="sm">
                                                     <thead>
                                                         <tr>
                                                             <th>#</th>
