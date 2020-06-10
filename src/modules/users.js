@@ -621,6 +621,24 @@ const Users = props => {
                                     onClick={() => openEditUser(row)}
                                   > Edit User
                                   </Dropdown.Item>
+                                  <Dropdown.Item style={{ textAlign: 'end' }}
+                                    onClick={() => {
+                                      // eslint-disable-next-line no-restricted-globals
+                                      const resp = confirm(`Are you sure you want to reset password for: ${row.tokenid}?`);
+                                      if(resp){
+                                        firebase.functions().httpsCallable('resetUserPassword')
+                                        ({tokenId: row.tokenid}).then(response => {
+                                          console.log(response);
+                                          setSnackbarText(`Temporary Reset Password sent to user ${row.tokenid}`);
+                                          setSnackbar(true);
+                                        }).catch(error => {
+                                          console.error(error);
+                                          alert(error);
+                                        });
+                                      }
+                                    }}
+                                  > Reset User Password
+                                  </Dropdown.Item>
                                   <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
                                     onClick={() => {
                                       setUserToDelete(row.tokenid);
