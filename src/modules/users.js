@@ -12,12 +12,14 @@ import { MdMoreVert } from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
 import { nullChecker, listEmptyChecker, stringIsEmpty, stringIsNotEmpty } from '../utils/commonUtils';
 import { initialPageState, createData, verifyUserAlreadyExists, userStyles } from '../utils/userUtils';
+import { UserContext } from '../App';
 
 const Users = props => {
   const db = firebase.firestore();
   const [userRows, setUsers] = React.useState([]);
   const [ filteredUsers, setFilteredUsers ] = React.useState([]);
   const fileRef = React.useRef(null);
+  const { state } = React.useContext(UserContext);
   const [loading, setLoading] = React.useState(true);
   const [userModal, setUserModal] = React.useState(false);
   const [editUserModal, setEditUserModal] = React.useState(false);
@@ -640,13 +642,16 @@ const Users = props => {
                                     }}
                                   > Reset User Password
                                   </Dropdown.Item>
-                                  <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
+                                  {
+                                    state.tokenId === row.tokenid ? null :
+                                    <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
                                     onClick={() => {
                                       setUserToDelete(row.tokenid);
                                       setDeletePrompt(true);
                                     }}
                                   > <IoMdTrash /> Delete User
                                   </Dropdown.Item>
+                                  }
                                 </DropdownButton>
                               </td>
                             </tr>
