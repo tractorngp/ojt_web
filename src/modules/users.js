@@ -2,6 +2,7 @@ import React from 'react';
 import { TableContainer, Typography, CardContent, Snackbar } from '@material-ui/core';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/functions';
 import * as XLSX from 'xlsx';
 import { IoMdPersonAdd, IoMdSettings, IoMdTrash } from 'react-icons/io';
 import { useForm } from 'react-hook-form';
@@ -11,12 +12,14 @@ import { MdMoreVert } from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
 import { nullChecker, listEmptyChecker, stringIsEmpty, stringIsNotEmpty } from '../utils/commonUtils';
 import { initialPageState, createData, verifyUserAlreadyExists, userStyles } from '../utils/userUtils';
+import { UserContext } from '../App';
 
 const Users = props => {
   const db = firebase.firestore();
   const [userRows, setUsers] = React.useState([]);
   const [ filteredUsers, setFilteredUsers ] = React.useState([]);
   const fileRef = React.useRef(null);
+  const { state } = React.useContext(UserContext);
   const [loading, setLoading] = React.useState(true);
   const [userModal, setUserModal] = React.useState(false);
   const [editUserModal, setEditUserModal] = React.useState(false);
@@ -621,13 +624,34 @@ const Users = props => {
                                     onClick={() => openEditUser(row)}
                                   > Edit User
                                   </Dropdown.Item>
-                                  <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
+                                  <Dropdown.Item style={{ textAlign: 'end' }}
+                                    onClick={() => {
+                                      // eslint-disable-next-line no-restricted-globals
+                                      const resp = confirm(`Are you sure you want to reset password for: ${row.tokenid}?`);
+                                      if(resp){
+                                        firebase.functions().httpsCallable('resetUserPassword')
+                                        ({tokenId: row.tokenid}).then(response => {
+                                          console.log(response);
+                                          setSnackbarText(`Temporary Reset Password sent to user ${row.tokenid}`);
+                                          setSnackbar(true);
+                                        }).catch(error => {
+                                          console.error(error);
+                                          alert(error);
+                                        });
+                                      }
+                                    }}
+                                  > Reset User Password
+                                  </Dropdown.Item>
+                                  {
+                                    state.tokenId === row.tokenid ? null :
+                                    <Dropdown.Item style={{ textAlign: 'end', color: '#d9534f' }}
                                     onClick={() => {
                                       setUserToDelete(row.tokenid);
                                       setDeletePrompt(true);
                                     }}
                                   > <IoMdTrash /> Delete User
                                   </Dropdown.Item>
+                                  }
                                 </DropdownButton>
                               </td>
                             </tr>
