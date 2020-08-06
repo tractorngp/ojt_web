@@ -130,7 +130,7 @@ const Users = props => {
   };
 
   const UploadErrorPopup = (
-  <Modal show={uploadError !== null} onHide={()=>{
+  <Modal size="lg" show={uploadError !== null} onHide={()=>{
     setUploadError(null);
   }} >
     <Modal.Header closeButton>
@@ -139,20 +139,21 @@ const Users = props => {
   
     <Modal.Body>
       <p>Upload was stopped because of the following errors in the document.</p>
+      <div style={{maxHeight: '150px', overflowY : 'auto', overflowX: 'hidden'}}>
       <ListGroup>
         { uploadError !== null ? uploadError.map(err => (
           <ListGroup.Item key={err}> {err} </ListGroup.Item>
         )) : null}
       </ListGroup>
-    </Modal.Body>
-    <Modal.Footer>
-    <ListGroup>
+      </div>
+      <hr />
+      <ListGroup>
         
           <ListGroup.Item key={'rule1'} style={{ color: '#d9534f', fontSize: '0.9rem', fontWeight: '600' }}>  *Roles can be only User or Admin (case insensitive) </ListGroup.Item>
           <ListGroup.Item key={'rule2'} style={{ color: '#d9534f', fontSize: '0.9rem', fontWeight: '600' }}>  *Password should contain atleast 8 characters, <br /> 
           one uppercase character, one lowercase character, one special character and a number </ListGroup.Item>
       </ListGroup>
-    </Modal.Footer>
+    </Modal.Body>
   </Modal>
   )
 
@@ -170,8 +171,7 @@ const Users = props => {
         const batch = db.batch();
         if(errorList.length > 0) {
           setUploadError(errorList);
-          return;
-        }
+        }else {
         processedList.forEach(pUser => {
           batch.set(db.collection('users').doc(String(pUser.tokenId)), pUser);
         });
@@ -185,8 +185,14 @@ const Users = props => {
           alert('Bulk Upload Users failed!');
           console.error(error);
         })
+      }
+      
       })
-    }; reader.readAsBinaryString(file);
+    }; 
+    if(file != null && file !== undefined)
+      {reader.readAsBinaryString(file);
+        val.target.value = null;
+      }
   }
 
   const applyFilters = _ => {
@@ -566,7 +572,7 @@ const Users = props => {
         <Col md={4}>
         </Col>
         <Col md={4}>
-          <Button onClick={triggerFile}variant={'danger'}>Upload Users From Excel</Button>
+          <Button onClick={triggerFile} variant={'danger'}>Upload Users From Excel</Button>
           <input ref={fileRef}
             accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
