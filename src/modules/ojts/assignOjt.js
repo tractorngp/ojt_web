@@ -45,7 +45,7 @@ const AssignOJT = ({ assignToGroups, assignToGroupsDispatch }) => {
     return (
         <ListGroup style={{maxHeight:'60vh',overflowY:'auto',overflowX:'hidden'}}>
             {
-                loading === true ? <span style={{textAlign:'cetner'}}><CircularProgress size={20} /> <p>Fetching Groups... </p> </span> :
+                loading === true ? <span style={{textAlign:'center'}}><CircularProgress size={20} /> <p>Fetching Groups... </p> </span> :
                 <span>{groups.length === 0 ? 'No Groups' :
                 groups.map(group => (
                     <ListGroup.Item key={group.group_id}>

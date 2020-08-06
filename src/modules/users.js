@@ -6,7 +6,7 @@ import 'firebase/functions';
 import * as XLSX from 'xlsx';
 import { IoMdPersonAdd, IoMdSettings, IoMdTrash } from 'react-icons/io';
 import { useForm } from 'react-hook-form';
-import { Row, Col, Form, Button, Modal, FormControl, Container, Table, DropdownButton, Dropdown, Alert, Popover, OverlayTrigger } from 'react-bootstrap';
+import { Row, Col, Form, Button, Modal, FormControl, Container, Table, DropdownButton, Dropdown, Alert, Popover, OverlayTrigger, ListGroup } from 'react-bootstrap';
 import { PageLoaderComponent, BackDropComponent } from '../components/pageLoaderComponent';
 import { MdMoreVert } from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
@@ -34,6 +34,7 @@ const Users = props => {
   const [showDeletePrompt, setDeletePrompt] = React.useState(false);
   const [userToDelete, setUserToDelete] = React.useState(null);
   const { handleSubmit, register, errors } = useForm();
+  const [uploadError, setUploadError] = React.useState(null);
 
   // for filtering
   const [filterUserName, setfUName] = React.useState("");
@@ -41,8 +42,10 @@ const Users = props => {
   const [filterUserToken, setfUToken] = React.useState("");
   const [filterRole, setRoleFilter] = React.useState("");
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   const tokenIdRegex = /^[0-9]*$/;
+  const EMAIL_ERROR = 'Email Format Error', PASS_ERROR = 'Password Error', ID_ERROR = 'Token ID Error', AT_ROW = ' at Row No. ';
 
   const getAllUsers = async _ => {
     setLoading(true);
@@ -62,7 +65,7 @@ const Users = props => {
         setVisibleUserRows(slicedList);
         setLoading(false);
       }, error => {
-        console.log(error);
+        console.error(error);
         setLoading(false);
         alert('Error Fetching Users');
       })
@@ -77,15 +80,35 @@ const Users = props => {
     setVisibleUserRows(slicedList);
   };
 
-  const validateAllFields = data => {
-    if (data.tokenId !== null && data.tokenId !== "" && data.tokenId !== " ") return true;
-    return false;
+  const validateAllFields = (data,index) => {
+    let errorText = '';
+    let allValidated = true;
+    if (data.tokenId === null || data.tokenId === "" || data.tokenId === " " || !tokenIdRegex.test(data.tokenId)) 
+      {
+        allValidated = false; errorText = errorText + ID_ERROR;
+      }
+    if(!emailRegex.test(data.email))
+      allValidated = false; errorText = errorText.length > 0 ? errorText + ',' + EMAIL_ERROR : errorText + EMAIL_ERROR;
+    if(!passwordRegex.test(data.password)){
+      allValidated = false; errorText = errorText.length > 0 ? errorText + ',' + PASS_ERROR : errorText + PASS_ERROR;
+    }
+    if( data.role != null && data.role !== undefined  && data.role.toLowerCase() !== 'user' && data.role.toLowerCase() !== 'admin'){
+      allValidated = false;
+      errorText = errorText = errorText.length > 0 ? errorText + ', Role Name Error' : errorText + ' Role Name Error';
+    }
+      if(!allValidated){
+      errorText = errorText + AT_ROW + index
+    }
+    return {allValidated, errorText};
   }
 
   const processUsers = userData => {
     const processedList = [];
+    let errorList = [];
+    let index = 1;
     userData.forEach(user => {
-      if (validateAllFields(user)) {
+      const {allValidated, errorText} = validateAllFields(user, index); 
+      if (allValidated) {
         const rawpw = user.password;
         processedList.push({
           tokenId: user.tokenId,
@@ -98,10 +121,40 @@ const Users = props => {
           createDate: new Date().toISOString(),
           modifiedDate: new Date().toISOString()
         });
+      } else {
+        errorList.push(errorText);
       }
+      index = index + 1;
     });
-    return processedList;
+    return {processedList ,errorList};
   };
+
+  const UploadErrorPopup = (
+  <Modal show={uploadError !== null} onHide={()=>{
+    setUploadError(null);
+  }} >
+    <Modal.Header closeButton>
+      <Modal.Title>Upload Terminated</Modal.Title>
+    </Modal.Header>
+  
+    <Modal.Body>
+      <p>Upload was stopped because of the following errors in the document.</p>
+      <ListGroup>
+        { uploadError !== null ? uploadError.map(err => (
+          <ListGroup.Item key={err}> {err} </ListGroup.Item>
+        )) : null}
+      </ListGroup>
+    </Modal.Body>
+    <Modal.Footer>
+    <ListGroup>
+        
+          <ListGroup.Item key={'rule1'} style={{ color: '#d9534f', fontSize: '0.9rem', fontWeight: '600' }}>  *Roles can be only User or Admin (case insensitive) </ListGroup.Item>
+          <ListGroup.Item key={'rule2'} style={{ color: '#d9534f', fontSize: '0.9rem', fontWeight: '600' }}>  *Password should contain atleast 8 characters, <br /> 
+          one uppercase character, one lowercase character, one special character and a number </ListGroup.Item>
+      </ListGroup>
+    </Modal.Footer>
+  </Modal>
+  )
 
   const UploadUsers = val => {
     const file = val.target.files[0];
@@ -113,9 +166,12 @@ const Users = props => {
       var wb = XLSX.read(fileData, { type: 'binary' });
       wb.SheetNames.forEach(function (sheetName) {
         var rowObj = XLSX.utils.sheet_to_row_object_array(wb.Sheets[sheetName]);
-        const processedList = processUsers(rowObj);
+        const {processedList, errorList} = processUsers(rowObj);
         const batch = db.batch();
-
+        if(errorList.length > 0) {
+          setUploadError(errorList);
+          return;
+        }
         processedList.forEach(pUser => {
           batch.set(db.collection('users').doc(String(pUser.tokenId)), pUser);
         });
@@ -127,9 +183,8 @@ const Users = props => {
           setBackdrpFlag(false);
           setMaskingText('');
           alert('Bulk Upload Users failed!');
-          console.log(error);
+          console.error(error);
         })
-        console.log(processedList);
       })
     }; reader.readAsBinaryString(file);
   }
@@ -452,6 +507,8 @@ const Users = props => {
 
       {/* Delete User Prompt */}
 
+      {UploadErrorPopup}
+
       <Modal size={'lg'} show={showDeletePrompt} onHide={closeDeletePrompt}>
         <BackDropComponent showBackdrop={backdropFlag} maskingText={maskingText} />
         <Modal.Header closeButton>
@@ -511,7 +568,7 @@ const Users = props => {
         <Col md={4}>
           <Button onClick={triggerFile}variant={'danger'}>Upload Users From Excel</Button>
           <input ref={fileRef}
-            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             style={{ 'display': 'none' }} type="file" onChange={(val) => UploadUsers(val)} />
         </Col>
         <Col md={4} style={{ display: 'flex', flexDirection: 'row-reverse', width: '100%' }}>
@@ -631,7 +688,6 @@ const Users = props => {
                                       if(resp){
                                         firebase.functions().httpsCallable('resetUserPassword')
                                         ({tokenId: row.tokenid}).then(response => {
-                                          console.log(response);
                                           setSnackbarText(`Temporary Reset Password sent to user ${row.tokenid}`);
                                           setSnackbar(true);
                                         }).catch(error => {
