@@ -3,11 +3,13 @@ import { Container, ListGroup, Row, Col, Button, Badge, Modal, Alert } from 'rea
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { Tooltip, makeStyles, Snackbar } from '@material-ui/core';
-import { IoMdInformationCircleOutline, IoMdPeople, IoMdAdd } from 'react-icons/io';
+import { IoMdInformationCircleOutline, IoMdPeople, IoMdAdd, IoMdDownload, IoMdCodeDownload } from 'react-icons/io';
 import AssignOJT from './assignOjt';
 import { BackDropComponent } from '../../components/pageLoaderComponent';
 import CreateOJTNew from './createOjtNew';
 import Spinner from 'react-spinkit';
+import * as jsPDF from 'jspdf'
+import * as _ from 'lodash';
 
 const OJT_TEMPLATES = 'ojt_templates';
 const useStyles = makeStyles(theme => ({
@@ -108,6 +110,7 @@ export const ViewOjt = props => {
                         assigned_date: new Date().toISOString(),
                         group_id: db.collection('groups').doc(group.group_id),
                         assigned_to: gMember,
+                        ojt_id: selectedOJT,
                         status: 'assigned'
                     });
                 });
@@ -136,6 +139,80 @@ export const ViewOjt = props => {
             ojtOpen: true,
             editingOJT: templateItem
         });
+    }
+
+
+    const downloadReport = async templateItem => {
+        setLoading(true);
+        console.log(JSON.stringify(templateItem))
+        let templateItem_id = templateItem.record_id
+        db.collection('assigned_ojts')
+        .where('ojt_id', "==", templateItem_id)
+        .where('active', "==", true)
+        .onSnapshot(snapshot => {
+            const assigned_ojts = snapshot.docs;
+            var names = []
+            var i = 0
+            const ojt_count = assigned_ojts.length;
+            var completedCount = 0;
+            if (assigned_ojts != null && assigned_ojts.length > 0) {
+                assigned_ojts.forEach(async (doc) => {
+                    const docData = doc.data();
+                    const user = docData.assigned_to;
+                    if(docData.status == "completed"){
+                        completedCount++;
+                    }
+                    const res1 = await user.get();
+                    names.push((res1.data() != null ? res1.data().name : ""))
+                    i = i + 1;
+                    if(i == assigned_ojts.length){
+                        names = _.uniq(names)
+                        console.log(names)
+                        var pdf = new jsPDF() 
+                        pdf.setFontSize(20);
+                        pdf.setFontStyle('bold');
+                        pdf.setTextColor(40);
+                        pdf.text("Report for OJT: " + templateItem.ojt_name, 10, 30)
+                        pdf.setFontSize(12);
+                        pdf.text("Number of people who completed: " + completedCount, 10, 40)
+                        pdf.text("Assigned to: ", 10, 50)
+                        pdf.setFontStyle('normal');
+                        var userCount = 1
+                        var y = 50
+                        if(names.length == 0){
+                            pdf.text("This OJT has not been assigned to anyone yet.", 15, (y + (userCount*10)))
+                        }
+                        else{
+                            names.forEach(name => {
+                                pdf.text(userCount + ". " + name, 15, (y + (userCount*10)))
+                                userCount++;
+                            })
+                        }
+                        
+                        pdf.save(templateItem.ojt_name.toString() + "-report-" + new Date().getTime() + ".pdf")
+                    }
+                });
+                setLoading(false);
+                
+            }
+            else {
+                var pdf = new jsPDF() 
+                pdf.setFontSize(20);
+                pdf.setFontStyle('bold');
+                pdf.setTextColor(40);
+                pdf.text("Report for OJT: " + templateItem.ojt_name, 10, 30)
+                pdf.setFontSize(12);
+                pdf.text("Assigned to: ", 10, 50)
+                pdf.setFontStyle('normal');
+                pdf.text("This OJT has not been assigned to anyone yet.", 15, 60)
+                pdf.save(templateItem.ojt_name.toString() + "-report-" + new Date().getTime() + ".pdf")
+                setLoading(false);
+            }
+        }, error => {
+            console.log(error);
+            alert('Error Fetching OJTs');
+        });
+        
     }
 
     const toggleOJTModal = val => {
@@ -225,6 +302,14 @@ export const ViewOjt = props => {
                                             <Button
                                                         onClick={() => handleOpen(templateItem.record_id)}
                                                         variant={'outline-info'} > <IoMdPeople /> Assign</Button>
+
+                                                    <Tooltip title="Download Report">
+                                                        <Button variant={'light'} 
+                                                        onClick={()=>downloadReport(templateItem)}
+                                                        >
+                                                            <IoMdDownload />
+                                                        </Button>
+                                                    </Tooltip>
 
 
                                                 </Col>
