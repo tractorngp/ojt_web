@@ -79,7 +79,8 @@ const Login = props => {
     const [loading, setLoading] = React.useState(false);
     const db = firebase.firestore();
 
-    const handleLogin = _ => {
+    const handleLogin = x => {
+        x.preventDefault();
         setLoading(true);
         const tokenId = formRef.current['tokenId'].value;
         const password = formRef.current['password'].value;
