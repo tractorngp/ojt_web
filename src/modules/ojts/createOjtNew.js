@@ -1,5 +1,5 @@
 import React from 'react';
-import * as firebase from 'firebase';
+import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/storage';
 import { Container, Modal, FormControl, Button, Row, Col, ListGroup, Alert, Form } from 'react-bootstrap';

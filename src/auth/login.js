@@ -2,7 +2,7 @@ import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import { UserContext } from '../App';
 import { makeStyles } from '@material-ui/core';
-import * as firebase from 'firebase';
+import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import * as bcrypt from 'bcryptjs';
