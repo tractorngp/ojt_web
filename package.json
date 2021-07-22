@@ -28,7 +28,7 @@
     "react-scripts": "3.4.1",
     "react-spinkit": "^3.0.0",
     "webpack": "4.42.0",
-    "xlsx": "^0.15.6"
+    "xlsx": "^0.17.0"
   },
   "scripts": {
     "start": "react-scripts start",
